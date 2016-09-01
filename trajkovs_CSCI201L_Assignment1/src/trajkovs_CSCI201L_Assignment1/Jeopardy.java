@@ -43,7 +43,7 @@ public class Jeopardy {
 	
 	private void setPoints(String [] pts) {
 		for (int i = 0; i < pts.length; ++i) {
-			this.Points[i] = Integer.parseInt(pts[i]);
+			this.Points[i] = Integer.parseInt(pts[i].trim());
 		}
 	}
 
@@ -171,45 +171,48 @@ public class Jeopardy {
 			// Parse in the Categories
 			currLine = br.readLine();
 			String [] line = currLine.split("::");
-			if (line.length != 5)
+			if (line.length != 5) {
 				System.out.println("Wrong number of categories"); // change this to an exception
+				System.exit(1);
+			}
 			else
 				this.setCategories(line);
 			
 			// Parse in the Point values for questions
-			currLine = br.readLine();
+			currLine = br.readLine().trim();
 			line = currLine.split("::");
-			if (line.length != 5)
+			if (line.length != 5) {
 				System.out.println("Wrong number of categories"); // change this to an exception. check if only digits
+				System.exit(1);
+			}
 			else
 				this.setPoints(line);
 		
 			// Parse in the questions
 			while ((currLine = br.readLine()) != null) {
-				if (!currLine.startsWith("::")) { // check if it's alpha after the :: also
+				if (!currLine.trim().startsWith("::")) { // check if it's alpha after the :: also
 					System.out.println("Wrong question format");
-//					return;
+					System.exit(1);
 				}
 				else if (currLine.startsWith("::FJ")) {
 					line = currLine.split("::");
 					if (line.length != 4) {
 						System.out.println("Wrong format for Final Jeopardy question!");
+						System.exit(1);
 					}
-					FJQuestion = new Question(line[2], line[3]);
+					FJQuestion = new Question(line[2].trim(), line[3].trim());
 //					System.out.println("LEN: " + line.length);
 //					System.out.println(Arrays.toString(line));
 				} else {
 					line = currLine.split("::");
 //					error checking for valid category and, values
-					String cat = line[1];
+					String cat = line[1].trim();
 					int pts = Integer.parseInt(line[2]);
-					String question = line[3];
-					String answer = line[4];
+					String question = line[3].trim();
+					String answer = line[4].trim();
 					
 					Arrays.sort(Points);
-//					printArray(Categories);
-//					System.out.println(Arrays.toString(this.Categories));
-//					boolean test = elementExists(Categories, cat);
+					
 					if (elementExists(this.Categories, cat) /*&& Points.contains(pts)*/) {
 						// if first time adding key
 						if (Questions.get(cat.toLowerCase()) == null)
@@ -238,8 +241,10 @@ public class Jeopardy {
 		boolean test = (FJQuestion == null);
 		System.out.println(test);
 		System.out.println(!(questionCount != 25 && test));
-		if ( !(questionCount != 25 && FJQuestion == null) )	// when both a question and FJ missing
+		if ( !(questionCount == 25 && FJQuestion != null) ) {	// when both a question and FJ missing
 			System.out.println("Wrong number of questions");
+//			System.exit(1);
+		}
 		else
 			System.out.println("Guccy");
 	}
@@ -247,19 +252,22 @@ public class Jeopardy {
 	private static void GenerateTeams() {
 		Scanner userInput = new Scanner(System.in);
 		numTeams = 0;
-		
+
+		System.out.print("Please enter the number of teams that will be playing the game (1-4): ");
 		while (numTeams < 1 || numTeams > 4) {
-			System.out.print("Enter the number of teams 1-4: ");
-			numTeams = Integer.parseInt(userInput.next());
+			numTeams = Integer.parseInt(userInput.nextLine());
 
 			if (numTeams < 1 || numTeams > 4 /*|| numTeams == null*/)
-				System.out.println("Invalid number of teams!");
+				System.out.println("Invalid number of teams! Please try again!");
 		}
 		
 		for (int i = 1; i <= numTeams; ++i) {
-			String teamName = "Team " + i;
+//			String teamName;
+//			String teamName = "Team " + i;
 			System.out.print("Enter name for team " + i + " (Deafult 'Team " + i + "'): ");
-			teamName = userInput.next();
+			String teamName = (userInput.nextLine()).trim();
+			if (teamName.isEmpty())
+				teamName = "Team " + i;
 			Teams.add(new Team(teamName));
 			// error checking duplicste names. set default name
 		}
@@ -272,10 +280,14 @@ public class Jeopardy {
 		Jeopardy Game = new Jeopardy();
 		Game.ParseFile(args[0]/*, Questions, Categories, Points*/);
 		
-		System.out.println("test");
+		System.out.println("Welcome to Jeopardy!");
 		// Play the game
 		// Create the teams
 		GenerateTeams();
+		System.out.println("Thank you! Setting up the game for you...");
+		System.out.println("Ready to play!");
+		
+		System.out.println("Autoplay?"); // implement this. what is autoplay
 		
 		// Play game
 		// Create a starting team
