@@ -30,20 +30,20 @@ public class Jeopardy {
 	static private int numTeams;
 	static private ArrayList<Team> Teams = new ArrayList<Team>(0);
 	
-	static private String [][] Answers = { {"what", "who"}, {"is", "are"} };
+	static private String [][] Answers = { {"what", "who", "where", "how"}, {"is", "are"} };
 	
-	private void setCategories(String [] cat) {
-		this.Categories = cat.clone();
+	private static void setCategories(String [] cat) {
+		Categories = cat.clone();
 	}
 	
-	private void listCategories() {
-		for (String cat: this.Categories)
+	private static void listCategories() {
+		for (String cat: Categories)
 			System.out.println(cat);
 	}
 	
-	private void setPoints(String [] pts) {
+	private static void setPoints(String [] pts) {
 		for (int i = 0; i < pts.length; ++i) {
-			this.Points[i] = Integer.parseInt(pts[i].trim());
+			Points[i] = Integer.parseInt(pts[i].trim());
 		}
 	}
 
@@ -100,7 +100,14 @@ public class Jeopardy {
 		}
 	}
 	
-	private void showWinner() { // add exceptions for when empty array
+	private void showScores() { // add exceptions for when empty array
+//		ArrayList<Integer> winner = new ArrayList<Integer>(0); 
+		
+		for (Team team : Teams)
+			System.out.println("Team: " + team.getName() + ", Points: " + team.getPoints());
+	}
+	
+	private static void showWinner() { // add exceptions for when empty array
 		ArrayList<Integer> winner = new ArrayList<Integer>(0); 
 		winner.add(0);
 //		Team team = Teams.get(0);
@@ -122,20 +129,6 @@ public class Jeopardy {
 			System.out.print(Teams.get(team).getName() + Teams.get(team).getPoints());
 		System.out.println();
 	}
-	
-//	private int getQuestionCount() {
-//		int count = 0;
-//    for (HashMap.Entry<String, ArrayList<Question>> entry : Questions.entrySet()) {
-//    	ArrayList<Quesiton> qs = entry.getValue();
-//    	count += qs.size();
-//    }
-////    while (it.hasNext())
-////      count += it.;
-////    
-////    for(Map.Entry<Integer, String> entry : map.entrySet()){ 
-////    	System.out.printf("Key : %s and Value: %s %n", entry.getKey(), entry.getValue()); }
-//    
-//	}
 	
 	private void listTeams() {
 		for (Team team: Teams) {
@@ -160,13 +153,34 @@ public class Jeopardy {
 		return false;
 	}
 	
-	public void ParseFile(String input/*, ArrayList<Question> Questions, String [] Categories, int [] Points*/) {	
+	private static void checkGame(String input) {
+		if (input.split("\\s+").length == 1) {
+			if (input.toLowerCase().equals("replay")) {
+				System.out.println("Restarting...");
+				PlayGame();
+			} else if (input.toLowerCase().equals("exit")) {
+				System.out.println("Exiting...");
+				System.exit(0);
+			}
+		}
+	}
+	
+	private static boolean isNumber(String input) {
+		for (int i = 0; i < input.length(); ++i) {
+			if (!Character.isDigit(input.charAt(i)))
+				return false;
+		}
+		return true;
+	}
+	
+	public static void ParseFile(String input/*, ArrayList<Question> Questions, String [] Categories, int [] Points*/) {	
 		String currLine;
 		int questionCount = 0;
+		BufferedReader br = null;
 		
 		try {
 			// Create the file stream
-			BufferedReader br = new BufferedReader(new FileReader(input));
+			br = new BufferedReader(new FileReader(input));
 			
 			// Parse in the Categories
 			currLine = br.readLine();
@@ -176,7 +190,7 @@ public class Jeopardy {
 				System.exit(1);
 			}
 			else
-				this.setCategories(line);
+				/*this.*/setCategories(line);
 			
 			// Parse in the Point values for questions
 			currLine = br.readLine().trim();
@@ -186,7 +200,7 @@ public class Jeopardy {
 				System.exit(1);
 			}
 			else
-				this.setPoints(line);
+				/*this.*/setPoints(line);
 		
 			// Parse in the questions
 			while ((currLine = br.readLine()) != null) {
@@ -213,12 +227,12 @@ public class Jeopardy {
 					
 					Arrays.sort(Points);
 					
-					if (elementExists(this.Categories, cat) /*&& Points.contains(pts)*/) {
+					if (elementExists(Categories, cat) /*&& Points.contains(pts)*/) {
 						// if first time adding key
 						if (Questions.get(cat.toLowerCase()) == null)
-							this.Questions.put(cat.toLowerCase(), new ArrayList<Question>());
+							Questions.put(cat.toLowerCase(), new ArrayList<Question>());
 //							Questions.put(cat, new Question(cat, pts, question, answer));
-						this.Questions.get(cat.toLowerCase()).add(new Question(cat.toLowerCase(), pts, question, answer));
+						Questions.get(cat.toLowerCase()).add(new Question(cat.toLowerCase(), pts, question, answer));
 						//Questions.put(cat, new Question(cat, pts, question, answer));
 						questionCount++;
 					} else{
@@ -228,25 +242,27 @@ public class Jeopardy {
 				}
 			}
 
-			// Close the file stream
-			br.close();
-
 		} catch (FileNotFoundException fnfe) {
 			System.out.println("FileNotFoundException: " + fnfe.getMessage());
 		} catch (IOException ioe) {
 			System.out.println("IOException: " + ioe.getMessage());
+		} finally {
+			// Close the file stream
+			if (br != null) {
+				try {
+					br.close();
+				} catch (IOException ioe) {
+					System.out.println(ioe.getMessage());
+				}
+			}
+
+			if ( !(questionCount == 25 && FJQuestion != null) ) {	// when both a question and FJ missing
+				System.out.println("Wrong number of questions");
+				System.exit(1);
+			}
+			else
+				System.out.println("Guccy");
 		}
-		
-		System.out.println(questionCount);
-		boolean test = (FJQuestion == null);
-		System.out.println(test);
-		System.out.println(!(questionCount != 25 && test));
-		if ( !(questionCount == 25 && FJQuestion != null) ) {	// when both a question and FJ missing
-			System.out.println("Wrong number of questions");
-//			System.exit(1);
-		}
-		else
-			System.out.println("Guccy");
 	}
 	
 	private static void GenerateTeams() {
@@ -273,24 +289,9 @@ public class Jeopardy {
 		}
 	}
 	
-	public static void main(String [] args) {
-
-		// Init the game and parse in input file
-//		System.out.println(args[0]);
-		Jeopardy Game = new Jeopardy();
-		Game.ParseFile(args[0]/*, Questions, Categories, Points*/);
-		
-		System.out.println("Welcome to Jeopardy!");
-		// Play the game
-		// Create the teams
-		GenerateTeams();
-		System.out.println("Thank you! Setting up the game for you...");
-		System.out.println("Ready to play!");
-		
-		System.out.println("Autoplay?"); // implement this. what is autoplay
-		
-		// Play game
+	private static void PlayGame() {
 		// Create a starting team
+		Jeopardy Game = new Jeopardy();
 		int currTeam = (int)(Math.random() * numTeams);
 		int qsAnswered = 0;
 		
@@ -300,13 +301,14 @@ public class Jeopardy {
 		
 		while (qsAnswered <= 25) {
 			System.out.println(currTeam);
-			System.out.println("Current Team: " + Teams.get(currTeam).getName());
+			System.out.println("Team " + Teams.get(currTeam).getName() + " turn.");
 			
 			// Category selection
 			while (true) {
 				System.out.println("Choose a category:");
 				Game.listCategories();
 				catChoice = userInput.nextLine();
+				checkGame(catChoice);	// check for replay or exit
 				if (elementExists(Categories, catChoice))
 					break;
 				System.out.println("Wrong Category choice!!!");
@@ -317,6 +319,7 @@ public class Jeopardy {
 				System.out.println("Choose a point value:");
 				Game.listPointValues(catChoice);
 				ptChoice = Integer.parseInt(userInput.nextLine());
+				checkGame(Integer.toString(ptChoice));	// check for replay or exit
 				if (elementExists(Points, ptChoice))
 					break;
 				System.out.println("Wrong Point Value choice!!!");
@@ -333,13 +336,14 @@ public class Jeopardy {
 				System.out.println("numTries: " + numTries);
 				if (numTries == 2) {
 					currQuestion.setAnswered();
-					System.out.println("Wrong answer!!!");
+					System.out.println("Wrong answer!!! " + ptChoice + " will be subtracted from your score.");
 					Teams.get(currTeam).subPoints(ptChoice);
 					break;
 				}
 				else {
 					System.out.print("Answer: ");
 					String ans = userInput.nextLine();
+					checkGame(ans);	// check for replay or exit
 		
 					String [] ansBeginning = ans.split("\\s+");
 //					System.out.println(Arrays.toString(ansBeginning));
@@ -347,12 +351,12 @@ public class Jeopardy {
 //						if (ans.toLowerCase() == currQuestion.getAnswer()) {
 						if (checkAnswer(ansBeginning, currQuestion.getAnswer())) {
 							currQuestion.setAnswered();
-							System.out.println("Correct answer!!!");
+							System.out.println("Correct answer!!! " + ptChoice + " will be added to your score.");
 							Teams.get(currTeam).addPoints(ptChoice);
 							break;
 						} else {
 							currQuestion.setAnswered();
-							System.out.println("Wrong answer!!!");
+							System.out.println("Wrong answer!!! " + ptChoice + " will be subtracted from your score.");
 							Teams.get(currTeam).subPoints(ptChoice);
 //							break;
 						}
@@ -362,7 +366,8 @@ public class Jeopardy {
 						++numTries;
 				}
 			}
-			Game.showWinner();
+			System.out.println("The current scores are: ");
+			Game.showScores();
 			
 			
 			// Update current team
@@ -372,11 +377,92 @@ public class Jeopardy {
 			
 			++qsAnswered;
 		}
+	}
+	
+	private static void FinalJeopardy() {
+		System.out.println("********************************");
+		System.out.println("******** Final Jeopardy ********");
+		System.out.println("********************************");
 		
-//		System.out.println(numTeams);
-////		Game.displayAllQuestions();
-//		Game.listTeams();
-		System.out.println("--DONE--");
+		System.out.println("Teams place your bets!!!");
+		
+		Scanner userInput = new Scanner(System.in);
+		String bet;
+		ArrayList<Integer> Bets = new ArrayList<Integer>(0);
+		
+		for (Team team : Teams) {
+			System.out.print(team.getName() + ": ");
+			boolean correct = false;
+			while (!correct) {
+				bet = userInput.nextLine();
+				checkGame(bet);
+				while (!isNumber(bet.trim())) {
+					System.out.println("Not a number. Please input a number for your bet.");
+					bet = userInput.nextLine();
+					checkGame(bet);
+				}
+				if (Integer.parseInt(bet.trim()) > team.getPoints())
+					System.out.println("Invalid bed. Please enter a bet withing range.");
+				else {
+					Bets.add(Integer.parseInt(bet.trim()));
+					correct = true;
+				}
+			}
+		}
+		
+		System.out.println(FJQuestion.getQuestion());
+		for (int i = 0; i < Teams.size(); ++i) {
+			int numTries = 0;
+			while (numTries<= 2) {
+				if (numTries == 2) {
+					System.out.println("Wrong answer!!! " + Bets.get(i) + " will be subtracted from your score.");
+					Teams.get(i).subPoints(Bets.get(i));
+					break;
+				}
+				else {
+					System.out.print(Teams.get(i).getName() + " answer: ");
+					String ans = userInput.nextLine();
+					checkGame(ans);	// check for replay or exit
+		
+					String [] ansBeginning = ans.split("\\s+");
+					if ( elementExists(Answers[0], ansBeginning[0]) && elementExists(Answers[1], ansBeginning[1]) ) {
+						if (checkAnswer(ansBeginning, FJQuestion.getAnswer())) {
+							System.out.println("Correct answer!!! " + Bets.get(i) + " will be added to your score.");
+							Teams.get(i).addPoints(Bets.get(i));
+							break;
+						} else {
+							System.out.println("Wrong answer!!! " + Bets.get(i) + " will be subtracted from your score.");
+							Teams.get(i).subPoints(Bets.get(i));
+						};
+						break;
+					} else
+						++numTries;
+				}
+			}
+		}		
+	}
+	
+	public static void main(String [] args) {
+
+		// Init the game and parse in input file
+		ParseFile(args[0]);
+		
+		System.out.println("Welcome to Jeopardy!");
+		// Play the game
+		// Create the teams
+		GenerateTeams();
+		System.out.println("Thank you! Setting up the game for you...");
+		System.out.println("Ready to play!");
+		
+		System.out.println("Autoplay?"); // implement this. what is autoplay
+		
+		// Play game
+//		FinalJeopardy();
+		PlayGame();
+		FinalJeopardy();
+//		showWinner();
+
+		System.out.println("--Game Finished--");
 		
 	}
 }
