@@ -62,4 +62,8 @@ public class Question {
 	public void setAnswered() {
 		Answered = true;
 	}
+	
+	public void setUnanswered() {
+		Answered = false;
+	}
 }
