@@ -37,14 +37,16 @@ public class GamePlay {
 			ArrayList<Question> qs = Questions.get(cat.toLowerCase());
 			
 			for (Question q : qs) {
-				if (!q.isAnswered())
+				if (!q.isAnswered()) {
 					availPts.add(q.getPointValue());
+				}
 			}
 			// If category has unanswered questions
 			if (!availPts.isEmpty()) {
 				System.out.println(cat);
 				availCats.add(cat.toLowerCase());
 			}
+			availPts.clear();
 		}
 		return availCats; // return the categories with unanswered questions
 	}
@@ -73,7 +75,7 @@ public class GamePlay {
 		
 		// make sure that varying length works
 		for (int i = 0; i < actual.length; ++i) {
-			if (!actual[i].toLowerCase().equals(userAns[i+2].toLowerCase()))
+			if (!actual[i].toLowerCase().trim().equals(userAns[i+2].toLowerCase()))
 				return false;
 		}
 		return true;
@@ -94,18 +96,19 @@ public class GamePlay {
 	}
 		
 	// Show all the scores for all the teams
-	private static void showScores() { // add exceptions for when empty array
+	protected static void showScores() { // add exceptions for when empty array
 		for (Team team : Teams)
 			System.out.println("Team: " + team.getName() + ", Points: " + team.getPoints());
 	}
 
 	// Checks if all teams have negative scores. Used before Final Jeopardy
 	protected static boolean teamsAllNegative() {
+		boolean teamPos = false;
 		for (Team team : GamePlay.Teams) {
-			if (team.getPoints() <= 0)
-				return false;
+			if (team.getPoints() > 0)
+				teamPos = true;
 		}
-		return true;
+		return !teamPos;
 	}
 	
 	// Finds the winner of the game
@@ -123,20 +126,20 @@ public class GamePlay {
 		
 		System.out.print("The winning team");
 		if (winner.size() == 1)
-			System.out.print(" is: ");
+			System.out.println(" is: ");
 		else
-			System.out.print("s are: ");
+			System.out.println("s are: ");
 		for (int team = 0; team < winner.size(); ++team)
-			System.out.print(Teams.get(team).getName() + Teams.get(team).getPoints());
-		System.out.println();
+			System.out.println(Teams.get(winner.get(team)).getName() + " with " + Teams.get(winner.get(team)).getPoints() + " points.");
 	}
 	
 	// Check for Exit and Replay signals
-	private static boolean checkGame(String input) {
+	private static boolean checkGame(String input, Scanner userInput) {
 		if (input.split("\\s+").length == 1) {
 			if (input.toLowerCase().equals("replay")) {
-				System.out.println("Restarting...");
+				System.out.println("Restarting...\n");
 				InitGame();
+				PlayGame(userInput);
 				return true;
 			} else if (input.toLowerCase().equals("exit")) {
 				System.out.println("Exiting...");
@@ -154,8 +157,8 @@ public class GamePlay {
 		String catChoice;
 		int ptChoice;
 		
-		while (qsAnswered <= 25) {
-			System.out.println("Team " + Teams.get(currTeam).getName() + " turn.");
+		while (qsAnswered < 25) {
+			System.out.println("\n*** Team " + Teams.get(currTeam).getName() + " turn ***\n");
 			
 			////////////////////////
 			// Category selection //
@@ -164,7 +167,7 @@ public class GamePlay {
 				System.out.println("Choose a category:");
 				ArrayList<String> cats = listCategories();
 				catChoice = userInput.nextLine().trim().toLowerCase();
-				if (checkGame(catChoice))	// check for replay or exit
+				if (checkGame(catChoice, userInput))	// check for replay or exit
 					return; // If true means restart so don't continue this method
 				if (!cats.contains(catChoice)) {
 					System.out.println("Wrong Category choice!!!");
@@ -179,7 +182,7 @@ public class GamePlay {
 				System.out.println("Choose a point value:");
 				listPointValues(catChoice);
 				String in = userInput.nextLine();
-				if (checkGame(in))	// check for replay or exit
+				if (checkGame(in, userInput))	// check for replay or exit
 					return; // If true means restart so don't continue this method
 				if (Helpers.isNumber(in)) {
 					ptChoice = Integer.parseInt(in);
@@ -198,7 +201,6 @@ public class GamePlay {
 			System.out.println("Question: " + currQuestion.getQuestion());
 			int numTries = 0;	// holds the number of tries
 			// Give the player a 2 tries
-			System.out.println(currQuestion.isAnswered());
 			while (numTries<= 2) {
 				if (numTries == 2) {
 					currQuestion.setAnswered();
@@ -210,7 +212,7 @@ public class GamePlay {
 				else {
 					System.out.print("Answer: ");
 					String ans = userInput.nextLine();
-					if (checkGame(ans))	// check for replay or exit
+					if (checkGame(ans, userInput))	// check for replay or exit
 						return; // If true means restart so don't continue this method
 		
 					String [] ansBeginning = ans.split("\\s+");
@@ -224,7 +226,7 @@ public class GamePlay {
 							currQuestion.setAnswered();
 							System.out.println("Wrong answer!!! " + ptChoice + " will be subtracted from your score.");
 							Teams.get(currTeam).subPoints(ptChoice);
-							System.out.println("The answer to the Final Jeopardy is: " + currQuestion.getAnswer());
+							System.out.println("The answer to the Question is: " + currQuestion.getAnswer());
 						}
 						break;
 					} else { // If it doesn't give the user a second chance
@@ -255,26 +257,27 @@ public class GamePlay {
 		System.out.println("Teams place your bets!!!");
 		
 		String bet;
-		ArrayList<Integer> Bets = new ArrayList<Integer>(0);
+		ArrayList<Integer> Bets = new ArrayList<Integer>();
 		
 		// Ask all teams to place bets
 		for (Team team : Teams) {
 			if (team.getPoints() <= 0) {
 				System.out.println(team.getName() + " doesn't have enough funds to bet. Skipping...");
+				Bets.add(0);
 			} else {
-				System.out.print(team.getName() + ": ");
 				boolean correct = false;
 				while (!correct) {
+					System.out.print(team.getName() + ": ");
 					bet = userInput.nextLine();
-					if (checkGame(bet))
+					if (checkGame(bet, userInput))
 						return; // If true means restart so don't continue this method
 					while (!Helpers.isNumber(bet.trim())) {
 						System.out.println("Not a number. Please input a number for your bet.");
 						bet = userInput.nextLine();
-						if (checkGame(bet))	// check for replay or exit
+						if (checkGame(bet, userInput))	// check for replay or exit
 							return; // If true means restart so don't continue this method
 					}
-					if (Integer.parseInt(bet.trim()) > team.getPoints())
+					if (Integer.parseInt(bet.trim()) > team.getPoints() || Integer.parseInt(bet.trim()) <= 0)
 						System.out.println("Invalid bed. Please enter a bet withing range.");
 					else {
 						Bets.add(Integer.parseInt(bet.trim()));
@@ -291,7 +294,7 @@ public class GamePlay {
 			if (Teams.get(i).getPoints() > 0) {
 				System.out.print(Teams.get(i).getName() + " answer: ");
 				String ans = userInput.nextLine();
-				if (checkGame(ans))	// check for replay or exit
+				if (checkGame(ans, userInput))	// check for replay or exit
 					return; // If true means restart so don't continue this method
 	
 				String [] ansBeginning = ans.split("\\s+");

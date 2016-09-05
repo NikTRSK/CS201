@@ -19,12 +19,14 @@ public class Helpers {
 		return false;
 	}
 	
+	// Reference of parseInt https://docs.oracle.com/javase/7/docs/api/java/lang/Integer.html#parseInt(java.lang.String,%20int)
 	public static boolean isNumber(String input) {
-		for (int i = 0; i < input.length(); ++i) {
-			if (!Character.isDigit(input.charAt(i)))
-				return false;
-		}
-		return true;
+		// if ParseInt throws exception we know it's not a digit
+		try {
+			Integer.parseInt(input);
+			return true;
+		} catch (NumberFormatException nfe) {}
+		return false;
 	}
 	
 	public static boolean allNumbers(String [] vals) {

@@ -61,18 +61,18 @@ public class Jeopardy {
 					// lookahed to see if the quesiton is on 2 lines
 					try { br.mark(10000); }
 					catch (IOException ioe) { System.out.println(ioe.getMessage()); }
-						currLine = br.readLine();
-						// Handles the last line of file
-						if (currLine != null) {
-							currLine.trim();
-							// if the question has 2nd line
-							if (!currLine.startsWith("::")) {
-								line = Helpers.appendToArray(line, currLine.split("::"));
-							} else {	// if it's not go back a line 
-								try { br.reset(); }
-								catch (IOException ioe) { System.out.println(ioe.getMessage()); } 
-							}
+					currLine = br.readLine();
+					// Handles the last line of file
+					if (currLine != null) {
+						currLine.trim();
+						// if the question has 2nd line
+						if (!currLine.startsWith("::")) {
+							line = Helpers.appendToArray(line, currLine.split("::"));
+						} else {	// if it's not go back a line 
+							try { br.reset(); }
+							catch (IOException ioe) { System.out.println(ioe.getMessage()); } 
 						}
+					}
 					if (Helpers.arrayEmpty(line, 1, line.length-1)) {
 						System.out.println("Wrong question format");
 						System.exit(1);						
@@ -93,7 +93,7 @@ public class Jeopardy {
 							System.exit(1);
 						}
 						GamePlay.FJQuestion = new Question(line[2].trim(), line[3].trim());
-					} else {
+					} else {	// Regular questions
 						if (Helpers.isNumber(line[2]))
 							pts = Integer.parseInt(line[2]);
 						else {
@@ -161,7 +161,8 @@ public class Jeopardy {
 	
 					if (numTeams < 1 || numTeams > 4)
 						System.out.println("Invalid number of teams! Please try again!");
-				}
+				} else
+					System.out.println("Not a number. Please input a number between 1 and 4!");
 			} else
 				System.out.println("Not a number. Please input a number between 1 and 4!");
 		}
@@ -172,9 +173,7 @@ public class Jeopardy {
 			if (teamName.isEmpty())
 				teamName = "Team " + i;
 			GamePlay.Teams.add(new Team(teamName));
-			// error checking duplicste names. set default name
 		}
-		// I don't close userIn since it closes System.in and crashes the program when used in GamePlay.PlayGame.
 	}
 	
 	// Adds the categories to the Categories variable
@@ -232,23 +231,24 @@ public class Jeopardy {
 		System.out.println("Thank you! Setting up the game for you...");
 		System.out.println("Ready to play!");
 		
-		System.out.println("The Game will autoplay now.\n");
+		System.out.println("The Game will autoplay now...\n");
 		///////////////
 		// PLAY GAME //
 		///////////////
 		GamePlay.PlayGame(userInput);
+		
 		if (GamePlay.teamsAllNegative())
 			System.out.println("All teams have a score of 0 or less. There are no winners");
-		else
+		else {
 			GamePlay.FinalJeopardy(userInput);
-		
-		// After final jeopardy check again if there are teams that have a score of 0
-		if (GamePlay.teamsAllNegative())
-			System.out.println("All teams have a score of 0. There are no winners");
-		else
-			GamePlay.showWinner();
+			// After final jeopardy check again if there are teams that have a score of 0
+			if (GamePlay.teamsAllNegative())
+				System.out.println("All teams have a score of 0. There are no winners");
+			else
+				GamePlay.showWinner();
+		}
 
 		userInput.close();
-		System.out.println("--Game Finished--\nThank you for editing.");		
+		System.out.println("\n--Game Finished--\nThank you for playing.");		
 	}
 }
