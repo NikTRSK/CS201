@@ -1,5 +1,7 @@
 package trajkovs_CSCI201L_Assignment1;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,6 +10,9 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import javax.swing.JComponent;
+import javax.swing.border.LineBorder;
 
 public class Helpers {
 	public static boolean elementExists(String [] array, String value) {
@@ -103,6 +108,13 @@ public class Helpers {
 		return false;
 	}
 
+	public static void styleComponent(JComponent item, Color backgroundColor, Color borderColor, int fontSize) {
+		item.setBackground(backgroundColor);
+		item.setOpaque(true);
+		item.setBorder(new LineBorder(borderColor));
+		item.setFont(new Font("Cambria", Font.BOLD, fontSize));
+	}
+	
   public static void ParseFile(File input) {  
     String currLine; // holds the current line
     int questionCount = 0; // holds the number of questions loaded
