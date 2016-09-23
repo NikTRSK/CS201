@@ -3,6 +3,7 @@ package trajkovs_CSCI201L_Assignment1;
 import javax.swing.JFrame;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -16,40 +17,44 @@ import java.io.File;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.applet.Applet;
 
 public class FileChooser extends JFrame {
+	private static final long serialVersionUID = 1L;
 	// GUI Elements
-	private JLabel welcomeLbl, promptLbl, fileChooserLbl, fileNameLbl, teamPromptLbl;
+	JLabel welcomeLbl, promptLbl, fileChooserLbl, fileNameLbl, teamPromptLbl;
 	private JLabel [] teamLbls = new JLabel[4];
 	private JTextField [] teamTxtBoxes = new JTextField[4];
 	private JButton chooseFileBtn, startBtn, clearBtn, exitBtn;
 	private JSlider teamSelectSlider;
 	private JFileChooser chooseFile;
+	static protected JCheckBox quickPlay;
 	static JDialog popup;
+	File inputFile;
 	
 	// Create Border
   Border line = new LineBorder(Color.DARK_GRAY);
   Border margin = new EmptyBorder(5, 15, 5, 15);
   Border compound = new CompoundBorder(line, margin);
 	
-  // Variables
-  File inputFile;
-  
 	public FileChooser() {
 		super("Welcome to Jeopardy");
 		initializeComponents();
@@ -60,14 +65,21 @@ public class FileChooser extends JFrame {
 	private void initializeComponents() {
 		
 		// Create welcome Label
-		welcomeLbl = new JLabel("Welcome to Jeopardy");
-		welcomeLbl.setFont(new Font("Cambria", Font.BOLD, 25));
+		welcomeLbl = new JLabel("Welcome to Jeopardy!");
+		welcomeLbl.setFont(new Font("Cambria", Font.BOLD, 45));
 		welcomeLbl.setForeground(Color.WHITE);
 		welcomeLbl.setHorizontalAlignment(JLabel.CENTER);
+		welcomeLbl.setAlignmentX(JComponent.CENTER_ALIGNMENT);
+		
+		// Create Quick Play checkbox
+		quickPlay = new JCheckBox("Quick Play");
+		quickPlay.setBackground(Color.BLUE);
+		quickPlay.setForeground(Color.WHITE);
+		quickPlay.setFont(new Font("Cambria", Font.BOLD, 15));
 		
 		// Create prompt Label
 		promptLbl = new JLabel("Choose the game file, number of teams, and team names before starting the game");
-		promptLbl.setFont(new Font("Cambria", Font.BOLD, 15));
+		promptLbl.setFont(new Font("Cambria", Font.BOLD, 18));
 		promptLbl.setForeground(Color.WHITE);
 		promptLbl.setHorizontalAlignment(JLabel.CENTER);
 		
@@ -75,27 +87,25 @@ public class FileChooser extends JFrame {
 		// File Chooser //
 		//////////////////
 		fileChooserLbl = new JLabel("Please choose a game file.");
-		fileChooserLbl.setFont(new Font("Cambria", Font.BOLD, 15));
+		fileChooserLbl.setFont(new Font("Cambria", Font.BOLD, 17));
 		fileChooserLbl.setForeground(Color.WHITE);
 		
 		chooseFileBtn = new JButton("Choose File");
-		chooseFileBtn.setFont(new Font("Cambria", Font.BOLD, 15));
-		chooseFileBtn.setForeground(Color.WHITE);
-    // Make it look flat
-    chooseFileBtn.setForeground(Color.WHITE);
-    chooseFileBtn.setBackground(Color.DARK_GRAY);
-    chooseFileBtn.setBorder(compound);
+		Helpers.styleComponentFlat(chooseFileBtn, Color.WHITE, Color.DARK_GRAY, Color.DARK_GRAY, 17, true);
     
-		fileNameLbl = new JLabel("");
-		fileNameLbl.setFont(new Font("Cambria", Font.BOLD, 15));
-		fileNameLbl.setForeground(Color.BLACK);
+		fileNameLbl = new JLabel("", SwingConstants.CENTER);
+		fileNameLbl.setPreferredSize(new Dimension(200, 20));
+		fileNameLbl.setFont(new Font("Cambria", Font.BOLD, 17));
+		fileNameLbl.setForeground(Color.WHITE);
 		
     //////////////////
     // Team Select //
     /////////////////
 		teamPromptLbl = new JLabel("Please choose the number of teams that will be playing on the slider below.");
-		teamPromptLbl.setFont(new Font("Cambria", Font.BOLD, 15));
-		teamPromptLbl.setForeground(Color.BLACK);
+		teamPromptLbl.setFont(new Font("Cambria", Font.BOLD, 17));
+		teamPromptLbl.setForeground(Color.WHITE);
+		teamPromptLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+		teamPromptLbl.setBorder(new EmptyBorder(0,0,5,0));
 		
 		createTeamSlider();
 		
@@ -104,53 +114,38 @@ public class FileChooser extends JFrame {
 		///////////////
 		for (int teamLbl = 0; teamLbl < 4; ++teamLbl) {
 			teamLbls[teamLbl] = new JLabel("Please name Team " + (teamLbl+1));
-			teamLbls[teamLbl].setFont(new Font("Cambria", Font.BOLD, 17));
-			teamLbls[teamLbl].setForeground(Color.WHITE);
-			teamLbls[teamLbl].setBackground(Color.DARK_GRAY);
-			teamLbls[teamLbl].setOpaque(true);
-			teamLbls[teamLbl].setBorder(compound);
+			Helpers.styleComponentFlat(teamLbls[teamLbl], Color.WHITE, Color.DARK_GRAY, Color.DARK_GRAY, 22, true);
+			teamLbls[teamLbl].setVisible(false);
 		}
 		
 		for (int team = 0; team < 4; ++team) {
 			teamTxtBoxes[team] = new JTextField("");
-			teamTxtBoxes[team].setFont(new Font("Cambria", Font.BOLD, 17));
-			teamTxtBoxes[team].setForeground(Color.WHITE);
-			teamTxtBoxes[team].setBackground(Color.GRAY);
-			teamTxtBoxes[team].setOpaque(true);
-			teamTxtBoxes[team].setBorder(compound);
+			Helpers.styleComponentFlat(teamTxtBoxes[team], Color.WHITE, Color.GRAY, Color.DARK_GRAY, 22, true);
 			teamTxtBoxes[team].setPreferredSize(new Dimension(teamLbls[0].getPreferredSize()));
+			teamTxtBoxes[team].setVisible(false);
 		}
 
 		/////////////////////
 		// Nav bar buttons //
 		/////////////////////
 		startBtn = new JButton("Start Jeopardy");
-		startBtn.setFont(new Font("Cambria", Font.BOLD, 17));
-		startBtn.setForeground(Color.WHITE);
-		startBtn.setBackground(Color.DARK_GRAY);
-		startBtn.setBorder(compound);
-		startBtn.setPreferredSize(new Dimension(150, 35));
+		Helpers.styleComponentFlat(startBtn, Color.WHITE, Color.DARK_GRAY, Color.DARK_GRAY, 22, true);
+		startBtn.setPreferredSize(new Dimension(200, 35));
+//		startBtn.setEnabled(false);
 		
 		clearBtn = new JButton("Clear Choices");
-		clearBtn.setFont(new Font("Cambria", Font.BOLD, 17));
-		clearBtn.setForeground(Color.WHITE);
-		clearBtn.setBackground(Color.DARK_GRAY);
-		clearBtn.setBorder(compound);
-		clearBtn.setPreferredSize(new Dimension(150, 35));
+		Helpers.styleComponentFlat(clearBtn, Color.WHITE, Color.DARK_GRAY, Color.DARK_GRAY, 22, true);
+		clearBtn.setPreferredSize(new Dimension(200, 35));
 		
 		exitBtn = new JButton("Exit");
-		exitBtn.setFont(new Font("Cambria", Font.BOLD, 17));
-		exitBtn.setForeground(Color.WHITE);
-		exitBtn.setBackground(Color.DARK_GRAY);
-		exitBtn.setBorder(compound);
-		exitBtn.setPreferredSize(new Dimension(150, 35));
+		Helpers.styleComponentFlat(exitBtn, Color.WHITE, Color.DARK_GRAY, Color.DARK_GRAY, 22, true);
+		exitBtn.setPreferredSize(new Dimension(200, 35));
 		
 	}
 	
 	private void createGUI() {
-		setSize(1000, 600);
+		setSize(800, 825);
 		setLocation(100, 100);
-//		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setVisible(true);
 		
 		// Create Grid Bag Constraints
@@ -159,12 +154,21 @@ public class FileChooser extends JFrame {
 		////////////////////////////////
 		// Top part of Welcome Screen //
 		////////////////////////////////
+		JPanel welcomePanelTop = new JPanel(); welcomePanelTop.setLayout(new BoxLayout(welcomePanelTop, BoxLayout.X_AXIS));
+		welcomePanelTop.setBackground(Color.BLUE);
+		JPanel welcomeLblPanel = new JPanel();
+		welcomeLbl.setBorder(new EmptyBorder(0,100,0,0));
+		welcomeLblPanel.add(welcomeLbl); welcomeLblPanel.setBackground(Color.BLUE);
+		welcomePanelTop.add(welcomeLblPanel);
+		welcomePanelTop.add(quickPlay);
 		
-		// Create TOP panel and set color
-		JPanel welcomePanel = new JPanel(new GridLayout(2, 0));
-		welcomePanel.setBackground(Color.blue);
-		welcomePanel.add(welcomeLbl);
+		JPanel welcomePanel = new JPanel(); welcomePanel.setLayout(new BoxLayout(welcomePanel, BoxLayout.Y_AXIS));
+		welcomePanel.setBackground(Color.BLUE);
+		welcomePanel.add(welcomePanelTop);
+		promptLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+		promptLbl.setBorder(new EmptyBorder(20,0,0,0));
 		welcomePanel.add(promptLbl);
+		
 		add(welcomePanel, BorderLayout.NORTH);
 		
 		//////////////////
@@ -172,19 +176,16 @@ public class FileChooser extends JFrame {
 		//////////////////
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-//		mainPanel.setBackground(Color.CYAN);
 		add(mainPanel, BorderLayout.CENTER);
 		
 		//////////////////////////
 		// File / Team chooser //
 		/////////////////////////
 		JPanel filePanel = new JPanel();
-//		filePanel.setLayout(new BoxLayout(filePanel, BoxLayout.X_AXIS));
 		filePanel.setBackground(new Color(131, 205, 251));
 		FlowLayout filePanelLayout = new FlowLayout();
 		filePanelLayout.setHgap(5);
 		filePanel.setLayout(filePanelLayout);
-//		filePanel.setHgap(5);
 		mainPanel.add(filePanel);
 		filePanel.add(fileChooserLbl);
 		filePanel.add(chooseFileBtn);
@@ -205,31 +206,47 @@ public class FileChooser extends JFrame {
 		mainPanel.add(teamListPanel);
 		gbc.weightx = 1;
 		
+//		JPanel topTeamPanel
 		gbc.gridx = 1; gbc.gridy = 1;
+		gbc.insets = new Insets(0, 0, 2, 0);
 		teamListPanel.add(teamLbls[0], gbc);
 		gbc.gridx = 1; gbc.gridy = 2;
+		gbc.insets = new Insets(0, 0, 25, 0);
 		teamListPanel.add(teamTxtBoxes[0], gbc);
 		
-		gbc.gridx = 2; gbc.gridy = 1;
-		teamListPanel.add(teamLbls[2], gbc);
-		gbc.gridx = 2; gbc.gridy = 2;
-		teamListPanel.add(teamTxtBoxes[2], gbc);
-		
 		gbc.gridx = 1; gbc.gridy = 4;
+		gbc.insets = new Insets(0, 0, 2, 0);
 		teamListPanel.add(teamLbls[1], gbc);
 		gbc.gridx = 1; gbc.gridy = 5;
+		gbc.insets = new Insets(0, 0, 25, 0);
 		teamListPanel.add(teamTxtBoxes[1], gbc);
 		
+		gbc.gridx = 2; gbc.gridy = 1;
+		gbc.insets = new Insets(0, 0, 2, 0);
+		teamListPanel.add(teamLbls[2], gbc);
+		gbc.gridx = 2; gbc.gridy = 2;
+		gbc.insets = new Insets(0, 0, 25, 0);
+		teamListPanel.add(teamTxtBoxes[2], gbc);
+		
 		gbc.gridx = 2; gbc.gridy = 4;
+		gbc.insets = new Insets(0, 0, 2, 0);
 		teamListPanel.add(teamLbls[3], gbc);
 		gbc.gridx = 2; gbc.gridy = 5;
+		gbc.insets = new Insets(0, 0, 25, 0);
 		teamListPanel.add(teamTxtBoxes[3], gbc);		
-		
+		// Default state show only Team 1
+		teamLbls[0].setVisible(true);
+		teamTxtBoxes[0].setVisible(true);
 		////////////////////
 		// Navigation Bar //
 		////////////////////
 		JPanel navigationPanel = new JPanel();
+		// cahnge this to just empty border
 		navigationPanel.setBackground(new Color(131, 205, 251));
+	  Border navLine = new LineBorder(new Color(131, 205, 251));
+	  Border navMargin = new EmptyBorder(30, 0, 30, 0);
+	  Border navCompound = new CompoundBorder(navLine, navMargin);
+		navigationPanel.setBorder(navCompound);
 		add(navigationPanel, BorderLayout.SOUTH);
 		navigationPanel.add(startBtn);
 		navigationPanel.add(clearBtn);
@@ -244,13 +261,19 @@ public class FileChooser extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 		    chooseFile = new JFileChooser();
 		    chooseFile.setCurrentDirectory(new File(System.getProperty("user.dir")));
-//	    chooseFile.setDialogTitle("Open");
-//	    chooseFile.setFileSelectionMode();
+		    chooseFile.setFileFilter(new FileNameExtensionFilter("Text Files", "txt"));
 		    
 		    int returnVal = chooseFile.showOpenDialog(null);
 		    if (returnVal == JFileChooser.APPROVE_OPTION) {
 		    	inputFile = chooseFile.getSelectedFile();
-		    	System.out.println(inputFile.getName());
+					try {
+//						GamePlay.numTeams = teamSelectSlider.getValue();
+						Helpers.ParseFile(inputFile);
+						fileNameLbl.setText(inputFile.getName());
+//						GenerateTeams();
+//						GamePlay.InitGame();
+//						Jeopardy.createGameBoard();
+					} catch (RuntimeException rte) {displayPopup(rte.getMessage());}
 		    }
 			}
 		});
@@ -262,7 +285,7 @@ public class FileChooser extends JFrame {
 				int value = teamSelectSlider.getValue();
 				
 				// Hide all of the teams
-				for(int i = 0; i < value; ++i) {
+				for(int i = 0; i < 4; ++i) {
 					teamLbls[i].setVisible(false);
 					teamTxtBoxes[i].setVisible(false);
 				}
@@ -276,9 +299,14 @@ public class FileChooser extends JFrame {
 		
 		startBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				GamePlay.numTeams = teamSelectSlider.getValue();
-				Helpers.ParseFile(inputFile);
-				GenerateTeams();
+			GamePlay.numTeams = teamSelectSlider.getValue();
+			System.out.println("TEAMS: " + GamePlay.Teams.size());
+			GenerateTeams();
+			GamePlay.InitGame();
+			// Check for Quick Play
+			if (quickPlay.isSelected())
+				GamePlay.qsAnswered = 20;
+			Jeopardy.createGameBoard();
 			}
 			
 			private void GenerateTeams() {
@@ -288,16 +316,19 @@ public class FileChooser extends JFrame {
 						teamName = "Team " + i;
 					GamePlay.Teams.add(new Team(teamName));
 				}
-				
-//////////////// DEBUG
-				for (Team t : GamePlay.Teams)
-					System.out.println(t.getName());
-				GamePlay.displayAllQuestions();
 			}
 		});
 		
 		clearBtn.addActionListener((ActionEvent event) -> {
-      displayPopup("TEST");
+      // Clear file
+			inputFile = null;
+			fileNameLbl.setText("");
+			
+			// Clear teams
+			for (int team = 0; team < 4; ++team)
+				teamTxtBoxes[team].setText("");
+			teamSelectSlider.setValue(1);
+			
 		});
 		
 		exitBtn.addActionListener((ActionEvent event) -> {
@@ -309,7 +340,7 @@ public class FileChooser extends JFrame {
 		teamSelectSlider = new JSlider(JSlider.HORIZONTAL);
 		teamSelectSlider.setMaximum(4);
 		teamSelectSlider.setMinimum(1);
-		teamSelectSlider.setValue(2);
+		teamSelectSlider.setValue(1);
 		teamSelectSlider.setPaintLabels(true);
 		teamSelectSlider.setPaintTicks(true);
 		teamSelectSlider.setMajorTickSpacing(1);
@@ -320,19 +351,9 @@ public class FileChooser extends JFrame {
 		teamSelectSlider.setBorder(compound);
 	}
 	
-	private void displayTeam(int i) {
-		
-	}
-	
 	static void displayPopup(String text) {
 		popup = new JDialog();
-		popup.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-//		popup.setSize(400, 200);
-//		JLabel info = new JLabel(text);
-//		
-//		popup.add(info);
-//		popup.setVisible(true);
-		
+		popup.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);		
 		JOptionPane.showMessageDialog(popup, text, "Parsing Error", JOptionPane.ERROR_MESSAGE);
 	}
 	

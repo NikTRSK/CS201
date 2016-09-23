@@ -1,6 +1,7 @@
 package trajkovs_CSCI201L_Assignment1;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -11,9 +12,14 @@ public class GamePlay {
 	static protected Question FJQuestion = null;	// holds the Final Jeopardy question
 	static protected ArrayList<Team> Teams = new ArrayList<Team>(0); // holds all the teams
 	
-	static private String [][] Answers = { {"what", "who", "where", "when", "how"}, {"is", "are"} };	// used to check for question form of the answer
+	static protected String [][] Answers = { {"what", "who", "where", "when", "how"}, {"is", "are"} };	// used to check for question form of the answer
 	
 	static protected int numTeams; 
+	static protected int currTeam;
+	static protected int qsAnswered;
+	static protected Question currQuestion = null;
+	static protected int numTries = 0;
+	static protected int [] FJBets = new int[4]; // FJBets
 	//////////////////
 	// LIST METHODS //
 	//////////////////
@@ -57,7 +63,7 @@ public class GamePlay {
 	/////////////////////////////////
 	
 	// Returns the whole question object
-	private static Question getQuestion(String cat, int ptValue) {
+	protected static Question getQuestion(String cat, int ptValue) {
 		ArrayList<Question> qs = Questions.get(cat.toLowerCase());
 		for (Question q: qs) {
 			if (q.getPointValue() == ptValue)
@@ -71,7 +77,7 @@ public class GamePlay {
 	////////////////////
 	
 	// Check if users answer is correct
-	private static boolean checkAnswer(String [] userAns, String answer) {
+	static protected boolean checkAnswer(String [] userAns, String answer) {
 		String [] actual = answer.split("\\s+");
 		
 		// make sure that varying length works
@@ -241,9 +247,7 @@ public class GamePlay {
 			showScores();
 			
 			// Update current team
-			++currTeam;
-			if (currTeam >= Teams.size())
-				currTeam = 0;
+			updateCurrentTeam();
 			// Answer the answer question count
 			++qsAnswered;
 		}
@@ -315,7 +319,7 @@ public class GamePlay {
 	}
 	
 	// Reinitializes the game after replay/exit is called
-	private static void InitGame() {
+	protected static void InitGame() {
 		for (Team team : Teams)
 			team.points = 0;
 		
@@ -326,5 +330,32 @@ public class GamePlay {
 				q.setUnanswered();
 			}			
 		}
+		// Generate the starting team
+		currTeam = (int)(Math.random() * Teams.size());
+		System.out.println(Teams.size() + ", " + currTeam);
+		// Set the number of answered questions to 0
+		qsAnswered = 0;
+		
+		// Reset bets fr all teams
+		Arrays.fill(FJBets, 0);
+	}
+	
+	static protected void updateCurrentTeam() {
+		// Update current team
+		++currTeam;
+		if (currTeam >= Teams.size())
+			currTeam = 0;
+	}
+	
+	static protected void resetVariables() {
+		Categories = null;
+		Categories = new String[5]; // holds all the categories for the game
+		Points = null;
+		Points = new int[5];	// holds the point values for the game
+		Questions = null;
+		Questions = new HashMap<String, ArrayList<Question>>();	// holds all the questions
+		FJQuestion = null;	// holds the Final Jeopardy question
+		Teams = null;
+		Teams = new ArrayList<Team>(0); // holds all the teams
 	}
 }

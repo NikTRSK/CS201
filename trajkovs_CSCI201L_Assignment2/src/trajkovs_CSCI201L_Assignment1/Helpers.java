@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import javax.swing.JComponent;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 public class Helpers {
@@ -115,10 +118,35 @@ public class Helpers {
 		item.setFont(new Font("Cambria", Font.BOLD, fontSize));
 	}
 	
+//	public static void styleComponent(JComponent item, Color textColor, Color backgroundColor, int fontSize) {
+//		item.setBackground(backgroundColor);
+//		item.setOpaque(true);
+//		item.setBorder(new LineBorder(backgroundColor));
+//		item.setFont(new Font("Cambria", Font.BOLD, fontSize));
+//	}
+	
+	public static void styleComponentFlat(JComponent item, Color textColor, Color backgroundColor, Color borderColor, int fontSize, boolean opaque) {
+		item.setFont(new Font("Cambria", Font.BOLD, fontSize));
+		item.setForeground(textColor);
+    // Make it look flat
+    item.setBackground(backgroundColor);
+		// Create Border
+	  Border line = new LineBorder(borderColor);
+	  Border margin = new EmptyBorder(5, 15, 5, 15);
+	  Border compound = new CompoundBorder(line, margin);
+    item.setBorder(compound);
+    item.setOpaque(opaque);
+	}
+	
+	// True - error; False - sucess
   public static void ParseFile(File input) {  
     String currLine; // holds the current line
     int questionCount = 0; // holds the number of questions loaded
     BufferedReader br = null;
+    
+    if (input == null) {
+    	throw new RuntimeException("Error opening file.");
+    }
     
     try {
       // Create the file stream
@@ -129,8 +157,7 @@ public class Helpers {
       String [] line = currLine.split("::", -1);
       // Check if there are duplicate categories
       if (line.length != 5 || Helpers.hasDuplicates(line)) {
-        FileChooser.displayPopup("Wrong number of categories or duplicate categories");
-        return;
+      	throw new RuntimeException("Wrong number of categories or duplicate categories");
       }
       else
         Jeopardy.setCategories(line);
@@ -140,8 +167,7 @@ public class Helpers {
       line = currLine.split("::", -1);
       // Check if there are duplicate point values or if they are all numbers
       if (line.length != 5 || Helpers.hasDuplicates(line) || !Helpers.allNumbers(line)) {
-        FileChooser.displayPopup("Wrong number of point values or duplicate point values");
-        return;
+      	throw new RuntimeException("Wrong number of point values or duplicate point values");
       }
       else
         Jeopardy.setPoints(line);
@@ -154,13 +180,12 @@ public class Helpers {
         currLine.trim();
         // check if the line starts with ::
         if (!currLine.startsWith("::")) {
-          FileChooser.displayPopup("Wrong question format");
-          return;
+        	throw new RuntimeException("Wrong question format");
         } else {
           line = currLine.split("::", -1);
           // lookahed to see if the quesiton is on 2 lines
           try { br.mark(10000); }
-          catch (IOException ioe) { FileChooser.displayPopup(ioe.getMessage()); }
+          catch (IOException ioe) { throw new RuntimeException(ioe.getMessage()); }
           currLine = br.readLine();
           // Handles the last line of file
           if (currLine != null) {
@@ -170,12 +195,11 @@ public class Helpers {
               line = Helpers.appendToArray(line, currLine.split("::"));
             } else {  // if it's not go back  
               try { br.reset(); }
-              catch (IOException ioe) { FileChooser.displayPopup(ioe.getMessage()); } 
+              catch (IOException ioe) { throw new RuntimeException(ioe.getMessage()); } 
             }
           }
           if (Helpers.arrayEmpty(line, 1, line.length-1)) {
-            FileChooser.displayPopup("Wrong question format");
-            return;           
+          	throw new RuntimeException("Wrong question format");
           }
           // error checking for valid category and, values
           String cat = line[1].trim();
@@ -185,20 +209,17 @@ public class Helpers {
           // Check for FINAL JEOPARDY Question
           if (cat.toLowerCase().equals("fj")) {
             if (GamePlay.FJQuestion != null) {
-              FileChooser.displayPopup("Final Jeopardy question already exists! Exiting...");
-              return;
+            	throw new RuntimeException("Final Jeopardy question already exists! Exiting...");
             }
             if (line.length != 4) {
-              FileChooser.displayPopup("Wrong format for Final Jeopardy question!");
-              return;
+            	throw new RuntimeException("Wrong format for Final Jeopardy question!");
             }
             GamePlay.FJQuestion = new Question(line[2].trim(), line[3].trim());
           } else {  // Regular questions
             if (Helpers.isNumber(line[2]))
               pts = Integer.parseInt(line[2]);
             else {
-              FileChooser.displayPopup("Wrong question format1");
-              return;
+            	throw new RuntimeException("Wrong question format1");
             }
             question = line[3].trim();
             answer = line[4].trim();
@@ -211,42 +232,39 @@ public class Helpers {
               
               // checks for questions with duplicate point values
               if (Jeopardy.pointsExist(cat, pts)) {
-                FileChooser.displayPopup("Duplicate point value!\nExiting...");
-                return;
+              	throw new RuntimeException("Duplicate point value!\nExiting...");
               }
               
               // Checks if the question exists. Only checks for same question not answer, since a question can't have 2 answers.
               // Only checks within the same category
               if (Helpers.questionExists(question, GamePlay.Questions.get(cat.toLowerCase()))) {
-                FileChooser.displayPopup("Duplicate question!\nExiting...");
-                return;
+              	throw new RuntimeException("Duplicate question!\nExiting...");
               }
               
               GamePlay.Questions.get(cat.toLowerCase()).add(new Question(cat.toLowerCase(), pts, question, answer));
               if (!cat.toLowerCase().equals("fj"))
                 questionCount++;
             } else{
-              FileChooser.displayPopup("Category or Points Value invalid");
-              return;
+            	throw new RuntimeException("Category or Points Value invalid");
             }
           }
         }
       }
-    } catch (FileNotFoundException fnfe) { FileChooser.displayPopup("FileNotFoundException: " + fnfe.getMessage()); }
-      catch (IOException ioe) { FileChooser.displayPopup("IOException: " + ioe.getMessage()); }
+    } catch (FileNotFoundException fnfe) { throw new RuntimeException("FileNotFoundException: " + fnfe.getMessage()); }
+      catch (IOException ioe) { throw new RuntimeException("IOException: " + ioe.getMessage()); }
       finally {
       // Close the file stream
       if (br != null) {
         try {
           br.close();
         } catch (IOException ioe) {
-          FileChooser.displayPopup(ioe.getMessage());
+        	throw new RuntimeException(ioe.getMessage());
         }
       }
     }
     // See if everything was loaded correctly
     Jeopardy.checkValidGame(questionCount);
   }
-
+  
 }
 
