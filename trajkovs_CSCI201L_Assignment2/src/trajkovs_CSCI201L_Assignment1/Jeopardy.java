@@ -45,11 +45,8 @@ public class Jeopardy {
 			System.exit(1);
 		}
 		
-		if (GamePlay.Questions.size() != 5) {
+		if (GamePlay.Questions.size() != 5)
 			throw new RuntimeException("Incorrect number of categories\n Terminating...");
-//			FileChooser.displayPopup("Incorrect number of categories\n Terminating...");
-//			System.exit(1);
-		}
 		
 		for (String key: GamePlay.Questions.keySet()) {
 			if (GamePlay.Questions.get(key).size() != 5) {
@@ -66,31 +63,6 @@ public class Jeopardy {
 	}
 	
 	public static void main(String [] args) {
-
 		fileChooser.setVisible(true);
-		// Init the game and parse in input file
-//		Jeopardy PlayGame = new Jeopardy();
-//		Helpers.ParseFile(args[0]);
-		
-//		Scanner userInput = new Scanner(System.in);
-//		GamePlay.GenerateTeams(userInput);
-		///////////////
-		// PLAY GAME //
-		///////////////
-//		GamePlay.PlayGame(userInput);
-//		
-//		if (GamePlay.teamsAllNegative())
-//			System.out.println("All teams have a score of 0 or less. There are no winners");
-//		else {
-//			GamePlay.FinalJeopardy(userInput);
-//			// After final jeopardy check again if there are teams that have a score of 0
-//			if (GamePlay.teamsAllNegative())
-//				System.out.println("All teams have a score of 0. There are no winners");
-//			else
-//				GamePlay.showWinner();
-//		}
-//
-//		userInput.close();
-//		System.out.println("\n--Game Finished--\nThank you for playing.");		
 	}
 }

@@ -20,6 +20,7 @@ public class GamePlay {
 	static protected Question currQuestion = null;
 	static protected int numTries = 0;
 	static protected int [] FJBets = new int[4]; // FJBets
+	static protected String [] FJAnswers = new String[4];
 	//////////////////
 	// LIST METHODS //
 	//////////////////
@@ -119,7 +120,7 @@ public class GamePlay {
 	}
 	
 	// Finds the winner of the game
-	protected static void showWinner() { // add exceptions for when empty array
+	protected static ArrayList<Integer> findWinner() { // add exceptions for when empty array
 
 		ArrayList<Integer> winner = new ArrayList<Integer>(0); 
 		winner.add(0);
@@ -130,14 +131,14 @@ public class GamePlay {
 			} else if (Teams.get(i).getPoints() == Teams.get(winner.get(0)).getPoints())
 				winner.add(i);
 		}
-		
-		System.out.print("The winning team");
-		if (winner.size() == 1)
-			System.out.println(" is: ");
-		else
-			System.out.println("s are: ");
-		for (int team = 0; team < winner.size(); ++team)
-			System.out.println(Teams.get(winner.get(team)).getName() + " with " + Teams.get(winner.get(team)).getPoints() + " points.");
+		return winner;
+//		System.out.print("The winning team");
+//		if (winner.size() == 1)
+//			System.out.println(" is: ");
+//		else
+//			System.out.println("s are: ");
+//		for (int team = 0; team < winner.size(); ++team)
+//			System.out.println(Teams.get(winner.get(team)).getName() + " with " + Teams.get(winner.get(team)).getPoints() + " points.");
 	}
 	
 	// Check for Exit and Replay signals
@@ -338,6 +339,9 @@ public class GamePlay {
 		
 		// Reset bets fr all teams
 		Arrays.fill(FJBets, 0);
+		Arrays.fill(FJAnswers, null);
+		
+//		GamePlay.Teams.get(1).addPoints(100); GamePlay.Teams.get(1).addPoints(600); GamePlay.Teams.get(1).addPoints(1100); GamePlay.Teams.get(1).addPoints(2500);
 	}
 	
 	static protected void updateCurrentTeam() {

@@ -2,6 +2,8 @@ package trajkovs_CSCI201L_Assignment1;
 
 import trajkovs_CSCI201L_Assignment1.*;
 
+import static javax.swing.Box.createVerticalBox;
+
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -15,36 +17,50 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
+import javax.swing.border.MatteBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.DefaultCaret;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 
 
 // Ref: https://docs.oracle.com/javase/tutorial/uiswing/components/menu.html
 public class GameBoardUI extends JFrame {
+	private static final long serialVersionUID = 1L;
+	
 	static private CardLayout cl = new CardLayout();
 	static private JPanel mainPanel;
 	JMenuBar menuBar;
@@ -75,20 +91,16 @@ public class GameBoardUI extends JFrame {
 	JSlider [] ptSelectSlider = new JSlider[4];
 	JLabel [] teamPtValLbl = new JLabel[4];
 	JButton [] setBetBtn = new JButton[4];
-	JTextArea FJQArea;
+	JTextPane FJQArea;
 	JTextField [] FJAArea = new JTextField[4];
 	JButton [] FJABtn = new JButton[4];
-	
-	// tmp
-	int [] ptvals = {200, 5000, 100, 500};
-//	String [] teamvals = {"Team1", "Awesome", "What", "Good"};
 	
 	public GameBoardUI () {
 		super("Play Jeopardy");
 		initializeComponents();
 		createGUI();
 		addEvents();
-		showPanel("finalJeopardyPanel");
+//		showPanel("finalJeopardyPanel");
 	}
 	
 	private void initializeComponents() {
@@ -116,21 +128,21 @@ public class GameBoardUI extends JFrame {
 		//////////////////////////
 		// Create title Label
 		titleLbl = new JLabel("Jeopardy");
-		titleLbl.setFont(new Font("Cambria", Font.BOLD, 25));
+		titleLbl.setFont(new Font("Cambria", Font.BOLD, 30));
 		titleLbl.setForeground(Color.WHITE);
-		titleLbl.setHorizontalAlignment(JLabel.CENTER);
-
+		titleLbl.setBorder(new MatteBorder(10,0,0,0, new Color(0,150,136)));
+		
 		// Create Category Labels
 		for (int i = 0; i < catLbls.length; ++i) {
 			catLbls[i] = new JLabel(GamePlay.Categories[i], SwingConstants.CENTER);
-			Helpers.styleComponent(catLbls[i], Color.RED, Color.BLUE, 20);
+			Helpers.styleComponent(catLbls[i], new Color(9, 204, 185), new Color(0,150,136), 20);
 		}
 
 		// Create Question buttons
 		for (int pt = 0; pt < 5; ++pt) {
 			for (int cat = 0; cat < 5; ++cat) {
 				qBtns[cat][pt] = (new JButton("$" + GamePlay.Points[pt]));
-				Helpers.styleComponent(qBtns[cat][pt], Color.DARK_GRAY, Color.BLUE, 22);
+				Helpers.styleComponent(qBtns[cat][pt], new Color(56,57,49), new Color(0,150,136), 22);
 				// Make it look flat
 				qBtns[cat][pt].setForeground(Color.WHITE);
 				qBtns[cat][pt].setPreferredSize(new Dimension(100, 100));
@@ -144,7 +156,6 @@ public class GameBoardUI extends JFrame {
 		
 		// Generate all teams and values to Score Panel
 		for (int i = 0; i < GamePlay.Teams.size(); i++) {
-			System.out.println(teamLbl.size());
 			teamLbl.get(i).getItem1().setText(GamePlay.Teams.get(i).getName()); 
 			teamLbl.get(i).getItem1().setFont(new Font("Cambria", Font.BOLD, 20));
 			teamLbl.get(i).getItem1().setForeground(Color.WHITE);
@@ -162,6 +173,7 @@ public class GameBoardUI extends JFrame {
 		
 		teamPrompt = new JTextArea("Welcome to Jeopardy!\nThe team to go first is " + GamePlay.Teams.get(GamePlay.currTeam).getName() + "\n");
 //		teamPrompt = new JTextArea("");
+		teamPrompt.setWrapStyleWord(true);
 		teamPrompt.setLineWrap(true);
 		teamPrompt.setForeground(Color.BLACK);
 		teamPrompt.setOpaque(false);
@@ -172,25 +184,25 @@ public class GameBoardUI extends JFrame {
 		
 		qTeamLbl = new JLabel("Team 201", SwingConstants.CENTER);
 		qTeamLbl.setVerticalAlignment(SwingConstants.CENTER);
-		qTeamLbl.setBackground(Color.BLUE);
+		qTeamLbl.setBackground(new Color(0,150,136));
 		qTeamLbl.setOpaque(true);
-		qTeamLbl.setBorder(new LineBorder(Color.BLUE));
+		qTeamLbl.setBorder(new LineBorder(new Color(0,150,136)));
 		qTeamLbl.setForeground(Color.LIGHT_GRAY);
 		qTeamLbl.setFont(new Font("Cambria", Font.BOLD, 30));
 		
 		qCatLbl = new JLabel("Category 2", SwingConstants.CENTER);
 		qCatLbl.setVerticalAlignment(SwingConstants.CENTER);
-		qCatLbl.setBackground(Color.BLUE);
+		qCatLbl.setBackground(new Color(0,150,136));
 		qCatLbl.setOpaque(true);
-		qCatLbl.setBorder(new LineBorder(Color.BLUE));
+		qCatLbl.setBorder(new LineBorder(new Color(0,150,136)));
 		qCatLbl.setForeground(Color.LIGHT_GRAY);
 		qCatLbl.setFont(new Font("Cambria", Font.BOLD, 30));
 		
 		qPtValueLbl = new JLabel("$100", SwingConstants.CENTER);
 		qPtValueLbl.setVerticalAlignment(SwingConstants.CENTER);
-		qPtValueLbl.setBackground(Color.BLUE);
+		qPtValueLbl.setBackground(new Color(0,150,136));
 		qPtValueLbl.setOpaque(true);
-		qPtValueLbl.setBorder(new LineBorder(Color.BLUE));
+		qPtValueLbl.setBorder(new LineBorder(new Color(0,150,136)));
 		qPtValueLbl.setForeground(Color.LIGHT_GRAY);
 		qPtValueLbl.setFont(new Font("Cambria", Font.BOLD, 30));
 		
@@ -224,21 +236,14 @@ public class GameBoardUI extends JFrame {
 		
 		qErrorLbl = new JLabel("This is a place holder for error message", SwingConstants.CENTER);
 		qErrorLbl.setVerticalAlignment(SwingConstants.CENTER);
-//		qErrorLbl.setBackground(Color.DARK_GRAY);
-//		qErrorLbl.setOpaque(true);
-//		qErrorLbl.setBorder(new LineBorder(Color.DARK));
 		qErrorLbl.setForeground(Color.LIGHT_GRAY);
 		qErrorLbl.setFont(new Font("Cambria", Font.BOLD, 22));
-		
-//		JLabel qTeamLbl, qCatLbl, qPtValueLbl;
-//		JTextArea qQuestionArea;
-//		JTextField qAnswerArea;
-//		JButton qSubmitBtn;
 	}
 	
 	private void createGUI() {
 		// Initial setup
 		setSize(1500, 825);
+		setResizable(false);
 		setLocation(100, 30);
 		add(menuBar, BorderLayout.NORTH);
 		JPanel screen = new JPanel();
@@ -262,7 +267,8 @@ public class GameBoardUI extends JFrame {
 //		screen.add(questionListPanel);
 				
 		JPanel titlePanel = new JPanel(); titlePanel.setLayout(new FlowLayout(FlowLayout.CENTER)); 
-		titlePanel.setBackground(Color.blue);
+		titlePanel.setPreferredSize(new Dimension(1030, 10));
+		titlePanel.setBackground(new Color(0,150,136));
 //		questionListPanel.add(titlePanel);
 		titlePanel.add(titleLbl);
 		questionListPanel.add(titlePanel);
@@ -291,7 +297,7 @@ public class GameBoardUI extends JFrame {
 		add(sidePanel, BorderLayout.CENTER);
 		
 		JPanel scorePanel = new JPanel(new GridLayout(4, 2));
-		scorePanel.setBackground(Color.DARK_GRAY);
+		scorePanel.setBackground(new Color(56,57,49));
 		sidePanel.add(scorePanel);
 		
 		// add all teams to Score Panel
@@ -303,7 +309,7 @@ public class GameBoardUI extends JFrame {
 		
 		JPanel gameProgressPanel = new JPanel();
 		gameProgressPanel.setLayout(new BoxLayout(gameProgressPanel, BoxLayout.Y_AXIS));
-		gameProgressPanel.setBackground(Color.YELLOW);
+		gameProgressPanel.setBackground(new Color(0,137,123));
 		sidePanel.add(gameProgressPanel);
 		
 		// Create the Game Progress panel		
@@ -316,31 +322,35 @@ public class GameBoardUI extends JFrame {
 		createQuestionPanel();
 		
 		// Create question panel
-		
-//		questionListPanel.setVisible(false);
-		
-//		JPanel testpanel = new JPanel();
-//		testpanel.setPreferredSize(new Dimension(1030,825));
-//		testpanel.setBackground(Color.RED);
-//		mainPanel.add(testpanel, "2");
-//		
-//		cl.show(mainPanel, "2");
-//		cl.add(testpanel, "2");
-//		cl.show(testpanel, "2");
-		
-//		CardLayout cl = (CardLayout)(mainPanel.getLayout());
-//		cl.show(questionListPanel, "2");
-		
 	mainPanel.add(answerQuestionPanel, "answerQuestionPanel");
 	mainPanel.add(finalJeopardyPanel, "finalJeopardyPanel");
-//	frame.add(test);
-////	finalJeopardyPanel.setVisible(true);
-//	cl.show(test, "1");		
 
 	}
 	
 	private void addEvents() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		// Listener for Window close
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent we) {
+				class closeDialog extends JOptionPane {
+					private static final long serialVersionUID = 1L;
+					public closeDialog() {
+						UIManager.put("OptionPane.background", new Color(0,150,136));
+						UIManager.put("Panel.background", new Color(0,150,136));
+						UIManager.put("Panel.foreground", Color.WHITE);
+						UIManager.put("Button.background", new Color(39,40,34));
+						UIManager.put("Button.foreground", Color.WHITE);
+					}
+				}
+				
+				String Btns[] = {"Yes", "No"};
+				new closeDialog();
+				int result = closeDialog.showOptionDialog(null, "Are you sure you want to quit?", "Quit Program", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, Btns, Btns[1]);
+				if (result == JOptionPane.YES_OPTION) {
+					System.exit(0);
+				}
+			}
+		});
 		
 		////////////////////
 		// Menu Listeners //
@@ -356,18 +366,18 @@ public class GameBoardUI extends JFrame {
 				for (int pt = 0; pt < 5; ++pt) {
 					for (int cat = 0; cat < 5; ++cat) {
 						qBtns[cat][pt].setEnabled(true);
+						qBtns[cat][pt].setBackground(new Color(56,57,49));
 					}
 				}
+				// Reset points in Point side panel
+				for (int i = 0; i < GamePlay.Teams.size(); i++)
+					teamLbl.get(i).getItem2().setText("$" + GamePlay.Teams.get(i).getPoints());
+				teamPrompt.setText("Game Restarted!\nWelcome to Jeopardy!\nThe team to go first is " + GamePlay.Teams.get(GamePlay.currTeam).getName() + "\n");
 			}
 		});
 		
 		chooseNewGameFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-//				Jeopardy.fileChooser.inputFile = null;
-//				Jeopardy.fileChooser.fileNameLbl.setText("");
-//				Jeopardy.fileChooser.inputFile = null;
-//				Jeopardy.fileChooser.teamSelectSlider.setValue(0);
-//				Jeopardy.fileChooser.setVisible(true);
 				Jeopardy.fileChooser = null;
 				Jeopardy.fileChooser = new FileChooser();
 				Jeopardy.GameBoard.setVisible(false);
@@ -391,18 +401,17 @@ public class GameBoardUI extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				GamePlay.currQuestion = GamePlay.getQuestion(GamePlay.Categories[cat],  GamePlay.Points[ptValue]);
 				// Update info on questionPanel
-//				GamePlay.displayAllQuestions();
-//				System.out.println(GamePlay.Categories[cat] + " | " + GamePlay.Points[ptValue]);
-//				System.out.println(GamePlay.currQuestion.getQuestion() + " | " + GamePlay.currQuestion.getCategory() + " | " + GamePlay.currQuestion.getPointValue());
-				
 				qTeamLbl.setText(GamePlay.Teams.get(GamePlay.currTeam).getName());
-				qCatLbl.setText(GamePlay.currQuestion.getCategory());
+				qCatLbl.setText(Helpers.capitalize(GamePlay.currQuestion.getCategory()));
 				qPtValueLbl.setText("$" + GamePlay.currQuestion.getPointValue());
 				qQuestionArea.setText(GamePlay.currQuestion.getQuestion());
 				qErrorLbl.setText("");
 				qAnswerArea.setText("");
 				showPanel("answerQuestionPanel"); // show question panel
+				teamPrompt.append(GamePlay.Teams.get(GamePlay.currTeam).getName() + " chose the question in " + Helpers.capitalize(GamePlay.currQuestion.getCategory()) + " worth $" + GamePlay.currQuestion.getPointValue());
 				((JButton)e.getSource()).setEnabled(false);
+				((JButton)e.getSource()).setBackground(new Color(113, 115, 98));
+				qAnswerArea.requestFocusInWindow();
 			}
 		}
 		// Create Question buttons
@@ -424,7 +433,10 @@ public class GameBoardUI extends JFrame {
 
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				label.setText(Integer.toString(slider.getValue()));
+				// bets of less than 0 don't make sense so force minumum of 1
+				if (slider.getValue() == 0)
+					slider.setValue(1);
+				label.setText("$"+slider.getValue());
 			}
 		}
 		
@@ -437,29 +449,28 @@ public class GameBoardUI extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				String answer = qAnswerArea.getText().trim();
 				String [] ansBeginning = answer.split("\\s+");
-				System.out.println(GamePlay.currTeam);
 				// Check if the user's answer begins with the proper format
 				if ( Helpers.elementExists(GamePlay.Answers[0], ansBeginning[0]) && Helpers.elementExists(GamePlay.Answers[1], ansBeginning[1]) ) {
 					if (GamePlay.checkAnswer(ansBeginning, GamePlay.currQuestion.getAnswer())) { // if the answer is correct add points to the user
 						GamePlay.currQuestion.setAnswered();
-						teamPrompt.append(GamePlay.Teams.get(GamePlay.currTeam).getName() + ", you got the answer right! $" + GamePlay.currQuestion.getPointValue() + " will be added to your score.\n");
+						teamPrompt.append(GamePlay.Teams.get(GamePlay.currTeam).getName() + ", you got the answer right! " + printPts(GamePlay.currQuestion.getPointValue()) + " will be added to your score.\n");
 						GamePlay.Teams.get(GamePlay.currTeam).addPoints(GamePlay.currQuestion.getPointValue());
 						teamLbl.get(GamePlay.currTeam).getItem2().setText("$" + GamePlay.Teams.get(GamePlay.currTeam).getPoints());
 						GamePlay.updateCurrentTeam();
-//						GamePlay.numTries = 0;
 					} else { // if not correct subtract points
 						GamePlay.currQuestion.setAnswered();
-						teamPrompt.append(GamePlay.Teams.get(GamePlay.currTeam).getName() + ", that is the wrong answer! $" + GamePlay.currQuestion.getPointValue() + " will be subtracted from your score.\n");
+						teamPrompt.append(GamePlay.Teams.get(GamePlay.currTeam).getName() + ", that is the wrong answer! " + printPts(GamePlay.currQuestion.getPointValue()) + " will be subtracted from your score.\n");
 						GamePlay.Teams.get(GamePlay.currTeam).subPoints(GamePlay.currQuestion.getPointValue());
-						teamLbl.get(GamePlay.currTeam).getItem2().setText("$" + GamePlay.Teams.get(GamePlay.currTeam).getPoints());
+						teamLbl.get(GamePlay.currTeam).getItem2().setText(printPts(GamePlay.Teams.get(GamePlay.currTeam).getPoints()));
 						GamePlay.updateCurrentTeam();
-//						GamePlay.numTries = 0;
 					}
 					if (GamePlay.qsAnswered == 25)
-						showPanel("finalJeopardyPanel");
-					else showPanel("questionListPanel");
+						createJeopardy();
 					GamePlay.qsAnswered++;
-					teamPrompt.append("Now it's " + GamePlay.Teams.get(GamePlay.currTeam).getName() + "'s Please Choose a question.\n");
+					if (GamePlay.qsAnswered < 25) {
+						showPanel("questionListPanel");
+						teamPrompt.append("Now it's " + GamePlay.Teams.get(GamePlay.currTeam).getName() + "'s turn! Please Choose a question.\n");
+					}
 					GamePlay.numTries = 0;
 				} else { // If it doesn't give the user a second chance
 					qErrorLbl.setText("The answer needs to be posed as a question. Try again!");
@@ -468,23 +479,110 @@ public class GameBoardUI extends JFrame {
 				}
 				// check if number of tries exceeded
 				if (GamePlay.numTries == 2) {
-					teamPrompt.append(GamePlay.Teams.get(GamePlay.currTeam).getName() + ", that is the wrong answer! $" + GamePlay.currQuestion.getPointValue() + " will be subtracted from your score.\n");
+					teamPrompt.append(GamePlay.Teams.get(GamePlay.currTeam).getName() + ", that is the wrong answer! " + printPts(GamePlay.currQuestion.getPointValue()) + " will be subtracted from your score.\n");
 					GamePlay.Teams.get(GamePlay.currTeam).subPoints(GamePlay.currQuestion.getPointValue());
 					System.out.println("Qans:" + GamePlay.qsAnswered);
 					if (GamePlay.qsAnswered == 25)
-						showPanel("finalJeopardyPanel");
+						createJeopardy();
 					else showPanel("questionListPanel");
 					GamePlay.qsAnswered++;
-					teamLbl.get(GamePlay.currTeam).getItem2().setText("$" + GamePlay.Teams.get(GamePlay.currTeam).getPoints());
+					teamLbl.get(GamePlay.currTeam).getItem2().setText(printPts(GamePlay.Teams.get(GamePlay.currTeam).getPoints()));
 					GamePlay.updateCurrentTeam();
 					teamPrompt.append("Now it's " + GamePlay.Teams.get(GamePlay.currTeam).getName() + "'s Please Choose a question.\n");
 					GamePlay.numTries = 0;
 				}
-//				teamLbl.get(GamePlay.currTeam).getItem2().setText("$" + GamePlay.Teams.get(GamePlay.currTeam).getPoints());
-//				teamPrompt.append("Now it's " + GamePlay.Teams.get(GamePlay.currTeam).getName() + "'s Please Choose a question.\n");
 				if (GamePlay.qsAnswered == 25)
-					showPanel("finalJeopardyPanel");
+					createJeopardy();
 				System.out.println("QsAns: " + GamePlay.qsAnswered + "tries: " + GamePlay.numTries);
+			}
+			
+			private void createJeopardy() {
+				if (GamePlay.teamsAllNegative()) {
+					
+					JDialog noJeopardyDialog = new JDialog();
+					noJeopardyDialog.setPreferredSize(new Dimension(400, 250));
+					noJeopardyDialog.setTitle("Thank you for playing");
+					
+					JPanel Panel = new JPanel(); Panel.setLayout(new BoxLayout(Panel, BoxLayout.Y_AXIS));
+					Panel.setBackground(new Color(0,150,136));
+					
+					// Create message
+					SimpleAttributeSet paneStyle = new SimpleAttributeSet();
+					StyleConstants.setAlignment(paneStyle, StyleConstants.ALIGN_CENTER);
+					StyleConstants.setFontFamily(paneStyle, "Cambria BOLD");
+					StyleConstants.setFontSize(paneStyle, 18);
+
+					JTextPane msg = new JTextPane();
+					msg.setEditable(false);
+					msg.setText("There are no teams eligible for Final Jeopardy.\nThere are no winners");
+					msg.setBackground(new Color(0,150,136));
+					msg.setForeground(Color.WHITE);
+					StyledDocument doc = msg.getStyledDocument();
+					doc.setParagraphAttributes(0, 104, paneStyle, false);
+					Panel.add(msg);
+					noJeopardyDialog.add(Panel);
+					
+					JPanel buttonPanel = new JPanel(); buttonPanel.setBackground(new Color(0,150,136));
+					JButton OKBtn = new JButton("Okay");
+					OKBtn.setBorder(new MatteBorder(13,16,13,16, Color.WHITE));
+					OKBtn.setBackground(Color.WHITE);
+					OKBtn.setForeground(new Color(0,150,136));
+					OKBtn.setFont(new Font("Cambria", Font.BOLD, 25));
+					// style button
+					buttonPanel.add(OKBtn);
+					noJeopardyDialog.setAlwaysOnTop(true);
+					noJeopardyDialog.setLocationRelativeTo(mainPanel);
+					noJeopardyDialog.setVisible(true);
+					OKBtn.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent ae) {
+							noJeopardyDialog.setVisible(false);
+							Jeopardy.GameBoard.setVisible(false);
+							Jeopardy.fileChooser = null;
+							Jeopardy.fileChooser = new FileChooser();
+							Jeopardy.GameBoard = null;
+							GamePlay.resetVariables();
+						}
+					});
+					noJeopardyDialog.add(buttonPanel, BorderLayout.SOUTH);
+					noJeopardyDialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+					noJeopardyDialog.pack();
+				} else {
+					teamPrompt.append("------Welcome to Final Jeopardy!------\n");
+					// check who can answer the question
+					for (int i = 0; i < GamePlay.Teams.size(); ++i) {
+						if (GamePlay.Teams.get(i).getPoints() <= 0) { 
+							setBetBtn[i].setEnabled(false);
+							ptSelectSlider[i].setEnabled(false);
+							teamPrompt.append(GamePlay.Teams.get(i).getName() + " doesn't have enough points to bet.\n");
+						}
+						else {
+							setupSlider(i);
+							setBetBtn[i].setEnabled(true);
+						}
+						FJABtn[i].setEnabled(false);
+						FJAArea[i].setEnabled(false);
+						
+					}
+					showPanel("finalJeopardyPanel");
+				}
+			}
+			
+			private void setupSlider(int i) {
+	      ptSelectSlider[i].setMaximum(GamePlay.Teams.get(i).getPoints());
+	      ptSelectSlider[i].setMinimum(0);
+	      ptSelectSlider[i].setValue(1);
+
+	      int spacing = 0;
+	      if (GamePlay.Teams.get(i).getPoints() <= 100) spacing = 10;
+	      else if (GamePlay.Teams.get(i).getPoints() <= 1000) spacing = 100;
+	      else if (GamePlay.Teams.get(i).getPoints() <= 2000) spacing = 200;
+	      else if (GamePlay.Teams.get(i).getPoints() <= 3000) spacing = 300;
+	      else if (GamePlay.Teams.get(i).getPoints() <= 4000) spacing = 400;
+	      else if (GamePlay.Teams.get(i).getPoints() <= 5000) spacing = 500;
+	      else if (GamePlay.Teams.get(i).getPoints() <= 5000) spacing = 600;
+	      else spacing = 1000;
+	      ptSelectSlider[i].setMajorTickSpacing(spacing);
 			}
 		});
 		
@@ -502,22 +600,165 @@ public class GameBoardUI extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				GamePlay.FJBets[teamID] = ptSelectSlider[teamID].getValue();
 				((JButton)e.getSource()).setEnabled(false);
+				teamPrompt.append(GamePlay.Teams.get(teamID).getName() + " bet $" + GamePlay.FJBets[teamID]);
+				
+				checkAllBets();
+			}
+			
+			// enables final jeopardy
+			private void checkAllBets() {
+				for (int i = 0; i < GamePlay.Teams.size(); ++i) {
+					if (setBetBtn[i].isEnabled())
+						return;
+				}
+				for (int i = 0; i < GamePlay.Teams.size(); ++i) {
+					if (GamePlay.Teams.get(i).getPoints() > 0) {
+						FJABtn[i].setEnabled(true);
+						FJAArea[i].setEnabled(true);
+						FJQArea.setText(GamePlay.FJQuestion.getQuestion());
+					}
+				}
+			}
+		}
+		
+		for (int i = 0; i < GamePlay.Teams.size(); ++i)
+			setBetBtn[i].addActionListener(new setBetListener(i));
+		
+		// When clicked clear text box
+		for (int i = 0; i < GamePlay.Teams.size(); ++i) {
+			FJAArea[i].addMouseListener(new MouseAdapter() {
+				public void mouseClicked(MouseAdapter e) {
+					System.out.println("HERE");
+//					if (/*((JTextArea)e.getSource()).isEnabled() && */(e.toString())./*getText().*/contains("enter your answer."))
+//						((JTextArea)e.getSource()).setText("");;
+				}
+			});
+		}
+		
+		//////////////////////////////
+		// Answer Question Listener //
+		//////////////////////////////
+		class answerJeopardyListener implements ActionListener {
+			int teamID;
+			
+			public answerJeopardyListener(int teamID) {
+				this.teamID = teamID;
+			}
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				GamePlay.FJAnswers[teamID] = FJAArea[teamID].getText().trim();
+				((JButton)e.getSource()).setEnabled(false);
+				
+				// if all answers inputed check answers
+				if (allAnswersEntered()) {
+					for (int i = 0; i < GamePlay.Teams.size(); ++i) {
+						checkFJAnswer(i);
+					}
+					// display winner
+					showWinner();
+				}
+			}
+			
+			private boolean allAnswersEntered() {
+				for (int i = 0; i < GamePlay.Teams.size(); ++i) {
+					if (FJABtn[i].isEnabled())
+						return false;
+				}
+				return true;
+			}
+			
+			private void checkFJAnswer(int id) {
+				// check if the answer is null (team not eligible to answer)
+				if (GamePlay.FJAnswers[id] == null) return;
+				
+				String [] ansBeginning = GamePlay.FJAnswers[id].split("\\s+");
+				// Check if the answer is in a question form
+				if (GamePlay.checkAnswer(ansBeginning, GamePlay.FJQuestion.getAnswer())) {
+					GamePlay.Teams.get(id).addPoints(GamePlay.FJBets[id]);
+					teamPrompt.append(GamePlay.Teams.get(id).getName() + " got the answer right. " + printPts(GamePlay.FJBets[id]) + " will be added to their total.");
+				} else {	// no second change in Final Jeopardy
+					GamePlay.Teams.get(id).subPoints(GamePlay.FJBets[id]);
+					teamPrompt.append(GamePlay.Teams.get(id).getName() + " got the answer wrong. " + printPts(GamePlay.FJBets[id]) + " will be subtracted from their total.");
+				}
+				teamLbl.get(id).getItem2().setText("$" + GamePlay.Teams.get(id).getPoints());
+			}
+			
+			private void showWinner() {
+				FJQArea.setText("Answer: " + GamePlay.FJQuestion.getAnswer() + "\n");
+				
+				JDialog winnerDialog = new JDialog();
+				winnerDialog.setPreferredSize(new Dimension(400, 250));
+				winnerDialog.setTitle("Thank you for playing");
+				
+				JPanel winnerPanel = new JPanel(); winnerPanel.setLayout(new BoxLayout(winnerPanel, BoxLayout.Y_AXIS));
+				winnerPanel.setBackground(new Color(0,150,136));
+				
+				// Create message
+				SimpleAttributeSet paneStyle = new SimpleAttributeSet();
+				StyleConstants.setAlignment(paneStyle, StyleConstants.ALIGN_CENTER);
+				StyleConstants.setFontFamily(paneStyle, "Cambria BOLD");
+				StyleConstants.setFontSize(paneStyle, 18);
+
+				JTextPane lbl = new JTextPane();
+				lbl.setEditable(false);
+				lbl.setText("And the winner(s) is/are\n");
+				lbl.setBackground(new Color(0,150,136));
+				lbl.setForeground(Color.WHITE);
+				StyledDocument doc = lbl.getStyledDocument();
+				doc.setParagraphAttributes(0, 104, paneStyle, false);
+				winnerPanel.add(lbl);
+				ArrayList<Integer> winner = GamePlay.findWinner();
+				for (Integer teamID : winner) {
+					lbl.setText(lbl.getText() + GamePlay.Teams.get(teamID).getName() + "\n");
+				}
+				
+//				winnerPanel.setFont(new Font("Cambria", Font.BOLD, 20));
+				winnerDialog.add(winnerPanel);
+				
+				JPanel buttonPanel = new JPanel(); buttonPanel.setBackground(new Color(0,150,136));
+				JButton OKBtn = new JButton("Okay");
+				OKBtn.setBorder(new MatteBorder(13,16,13,16, Color.WHITE));
+				OKBtn.setBackground(Color.WHITE);
+				OKBtn.setForeground(new Color(0,150,136));
+				OKBtn.setFont(new Font("Cambria", Font.BOLD, 25));
+				// style button
+				buttonPanel.add(OKBtn);
+				winnerDialog.setAlwaysOnTop(true);
+				winnerDialog.setLocationRelativeTo(mainPanel);
+				winnerDialog.setVisible(true);
+				OKBtn.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(ActionEvent ae) {
+						winnerDialog.setVisible(false);
+						Jeopardy.GameBoard.setVisible(false);
+						Jeopardy.fileChooser = null;
+						Jeopardy.fileChooser = new FileChooser();
+						Jeopardy.GameBoard = null;
+						GamePlay.resetVariables();
+					}
+					
+				});
+				winnerDialog.add(buttonPanel, BorderLayout.SOUTH);
+				winnerDialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+				winnerDialog.pack();
+				setVisible(true);
 			}
 		}
 		
 		for (int i = 0; i < GamePlay.Teams.size(); ++i) {
-			setBetBtn[i].addActionListener(new setBetListener(i));
+			FJABtn[i].addActionListener(new answerJeopardyListener(i));
 		}
 	}
 	
 	private void createQuestionPanel() {		
 		answerQuestionPanel = new JPanel();
 		answerQuestionPanel.setLayout(new BoxLayout(answerQuestionPanel, BoxLayout.Y_AXIS));
-		answerQuestionPanel.setBackground(Color.DARK_GRAY);
+		answerQuestionPanel.setBackground(new Color(56,57,49));
 		
 		JPanel qTitlePanel = new JPanel(new GridLayout(1, 3));
 		qTitlePanel.setPreferredSize(new Dimension(answerQuestionPanel.getWidth(), 100));
-		qTitlePanel.setBackground(Color.BLUE);
+		qTitlePanel.setBackground(new Color(0,150,136));
 		qTitlePanel.add(qTeamLbl);
 		qTitlePanel.add(qCatLbl);
 		qTitlePanel.add(qPtValueLbl);
@@ -525,7 +766,7 @@ public class GameBoardUI extends JFrame {
 		
 		JPanel errorPanel = new JPanel(new GridBagLayout());
 		errorPanel.setPreferredSize(new Dimension(answerQuestionPanel.getWidth(), 150));
-		errorPanel.setBackground(Color.DARK_GRAY);
+		errorPanel.setBackground(new Color(56,57,49));
 		errorPanel.add(qErrorLbl);
 		answerQuestionPanel.add(errorPanel);
 		
@@ -540,7 +781,7 @@ public class GameBoardUI extends JFrame {
 		
 	  JPanel answerPanel = new JPanel(new GridBagLayout());
 	  GridBagConstraints gbc = new GridBagConstraints();
-	  answerPanel.setBackground(Color.DARK_GRAY);
+	  answerPanel.setBackground(new Color(56,57,49));
 	  answerPanel.setPreferredSize(new Dimension(answerQuestionPanel.getWidth(), 100));
 //	  answerPanel.setLayout(new BoxLayout(answerPanel, BoxLayout.X_AXIS));
 	  answerQuestionPanel.add(answerPanel);
@@ -559,54 +800,58 @@ public class GameBoardUI extends JFrame {
 	  
 		JPanel FJTitlePanel = new JPanel();
 		FJTitlePanel.setBorder(new EmptyBorder(10, 20, 20, 20));
-		FJTitlePanel.setBackground(Color.DARK_GRAY);
+		FJTitlePanel.setBackground(new Color(56,57,49));
 		JLabel FJTitle = new JLabel("Final Jeopardy Round", SwingConstants.CENTER);
 		FJTitle.setPreferredSize(new Dimension(950, 60));
-		Helpers.styleComponent(FJTitle, Color.BLUE, Color.BLUE, 40);
+		Helpers.styleComponent(FJTitle, new Color(0,150,136), new Color(0,150,136), 40);
 		FJTitle.setForeground(Color.LIGHT_GRAY);
 	  FJTitlePanel.add(FJTitle);
 	  
 	  finalJeopardyPanel.add(FJTitlePanel);
+//	  
+	  JPanel BetsPanel = new JPanel(new GridLayout(4,0));
+	  BetsPanel.setBorder(new MatteBorder(0,0,0,50, new Color(56,57,49)));
+//	   add all slider panels regardless of # of teams
 	  
-//	  JPanel BetsPanel
+	  for (int i = 0; i < 4; ++i) {
+	  	finalPtChooser[i] = new JPanel();
+	  	finalPtChooser[i].setLayout(new BoxLayout(finalPtChooser[i], BoxLayout.X_AXIS));
+//	  	Box finalPtChooser[i] = Box.createVerticalBox();
+//	  	finalPtChooser[i].setPreferredSize(new Dimension(300, 800));
+	  	finalPtChooser[i].setBackground(new Color(56,57,49));
+	  	BetsPanel.add(finalPtChooser[i]);
+	  }
 	  for (int i = 0; i < GamePlay.Teams.size(); ++i) {
-	  	finalPtChooser[i] = new JPanel(); finalPtChooser[i].setLayout(new BoxLayout(finalPtChooser[i], BoxLayout.X_AXIS));
-	  	finalPtChooser[i].setBackground(Color.DARK_GRAY);
-	  	
 	  	teamPtLbl[i] = new JLabel(GamePlay.Teams.get(i).getName() + "'s bet:", SwingConstants.CENTER);
-	  	Helpers.styleComponent(teamPtLbl[i], Color.DARK_GRAY, Color.DARK_GRAY, 15);
+	  	Helpers.styleComponent(teamPtLbl[i], new Color(56,57,49), new Color(56,57,49), 15);
 	  	teamPtLbl[i].setForeground(Color.LIGHT_GRAY);
-	  	teamPtLbl[i].setPreferredSize(new Dimension(200, 50));
+	  	teamPtLbl[i].setPreferredSize(new Dimension(170, 50));
 	  	finalPtChooser[i].add(teamPtLbl[i]);
 	  	
 	  	ptSelectSlider[i] = new JSlider();
-	  	// do a check for negative value
-	  	ptSelectSlider[i].setMaximum(ptvals[i]);
-	  	ptSelectSlider[i].setMinimum(0);
-	  	ptSelectSlider[i].setValue(1);
+	  	ptSelectSlider[i].setValue(0);
+	  	ptSelectSlider[i].setMaximum(0);
 			ptSelectSlider[i].setPaintLabels(true);
 			ptSelectSlider[i].setPaintTicks(true);
-			int spacing = 0;
-			if (ptvals[i] <= 100) spacing = 10;
-			else if (ptvals[i] <= 1000) spacing = 100;
-			else spacing = 200;
-			ptSelectSlider[i].setMajorTickSpacing(spacing);
 //			ptSelectSlider[i].setMinorTickSpacing(1);
 			ptSelectSlider[i].setFont(new Font("Cambria", Font.BOLD, 15));
-			ptSelectSlider[i].setBackground(Color.DARK_GRAY);
+			ptSelectSlider[i].setBackground(new Color(56,57,49));
 			ptSelectSlider[i].setForeground(Color.WHITE);
-			ptSelectSlider[i].setPreferredSize(new Dimension(700, 70));
+			ptSelectSlider[i].setPreferredSize(new Dimension(650, 70));
 			// Create Border
-		  Border line = new LineBorder(Color.DARK_GRAY);
-		  Border margin = new EmptyBorder(5, 15, 5, 15);
+		  Border line = new LineBorder(new Color(56,57,49));
+//		  Border margin = new EmptyBorder(5, 15, 5, 15);
+		  Border margin = new EmptyBorder(0, 15, 0, 15);
 		  Border compound = new CompoundBorder(line, margin);
 			ptSelectSlider[i].setBorder(compound);
+//			ptSelectSlider[i].setBorder(new MatteBorder(5, 15, 5, 15, new Color(56,57,49)));
 			finalPtChooser[i].add(ptSelectSlider[i]);
 			
 			teamPtValLbl[i] = new JLabel("$" + Integer.toString(ptSelectSlider[i].getValue()), SwingConstants.CENTER);
-			Helpers.styleComponent(teamPtValLbl[i], Color.DARK_GRAY, Color.DARK_GRAY, 15);
+			Helpers.styleComponent(teamPtValLbl[i], new Color(56,57,49), new Color(56,57,49), 15);
 			teamPtValLbl[i].setForeground(Color.WHITE);
 			teamPtValLbl[i].setPreferredSize(new Dimension(50, 50));
+//			teamPtValLbl[i].setBorder(new MatteBorder(5, 15, 5, 15, new Color(56,57,49)));
 			finalPtChooser[i].add(teamPtValLbl[i]);
 			
 			setBetBtn[i] = new JButton("Set Bet");
@@ -614,82 +859,80 @@ public class GameBoardUI extends JFrame {
 			setBetBtn[i].setForeground(Color.BLACK);
 			setBetBtn[i].setBackground(Color.WHITE);
 	    setBetBtn[i].setBorder(compound);
-	    setBetBtn[i].setPreferredSize(new Dimension(80, 80));
+//	    setBetBtn[i].setPreferredSize(new Dimension(85, 95));
+	    setBetBtn[i].setBorder(new MatteBorder(5, 0, 5, 0, Color.WHITE));
+	    if (GamePlay.Teams.get(i).getPoints() <= 0)
+	    	setBetBtn[i].setEnabled(false);
 			finalPtChooser[i].add(setBetBtn[i]);
-
 			finalPtChooser[i].setBorder(new EmptyBorder(30, 0, 30, 0));
-	  	finalJeopardyPanel.add(finalPtChooser[i]);
+//	  	finalJeopardyPanel.add(finalPtChooser[i]);
 	  }
-	  
-	  
-	  FJQArea = new JTextArea("And the quesiton is...");
-	  FJQArea.setFont(new Font("Cambria", Font.BOLD, 22));
-	  FJQArea.setPreferredSize(new Dimension(950, 65));
-	  FJQArea.setEditable(false);
-	  FJQArea.setCursor(null);
-	  FJQArea.setFocusable(false);
-	  FJQArea.setLineWrap(true);
-	  FJQArea.setBackground(Color.BLUE);
+	  finalJeopardyPanel.add(BetsPanel);
+
+	  FJQArea = new JTextPane();
+		SimpleAttributeSet paneStyle = new SimpleAttributeSet();
+		StyleConstants.setAlignment(paneStyle, StyleConstants.ALIGN_CENTER);
+		StyleConstants.setFontFamily(paneStyle, "Cambria BOLD");
+		StyleConstants.setFontSize(paneStyle, 22);
+
+		FJQArea.setEditable(false);
+		FJQArea.setText("And the quesiton is...\n");
+		FJQArea.setBackground(new Color(0,150,136));
 	  FJQArea.setForeground(Color.WHITE);
-//	  FJQArea.setsty
+		StyledDocument doc = FJQArea.getStyledDocument();
+		doc.setParagraphAttributes(0, 104, paneStyle, false);
+	  FJQArea.setPreferredSize(new Dimension(950, 60));
+//	  FJQArea.setMaximumSize(new Dimension(950, 65));
 	  
 	  JPanel FJQAreaPanel = new JPanel();
-	  FJQAreaPanel.setBackground(Color.DARK_GRAY);
-	  FJQAreaPanel.setBorder(new EmptyBorder(0, 20, 50, 20));
+	  FJQAreaPanel.setBackground(new Color(56,57,49));
+	  FJQAreaPanel.setBorder(new EmptyBorder(0, 20, 30, 20));
 	  FJQAreaPanel.add(FJQArea);	  
 	  finalJeopardyPanel.add(FJQAreaPanel);
-//	  SwingConstants.CENTER
-	  
+
 	  JPanel [] FJanswerPanel = new JPanel[4]; 
-	  for (int i = 0; i < GamePlay.Teams.size(); ++i) {
+	  // add all panels to the layout
+	  JPanel FJAPanel = new JPanel(new GridLayout(2,2));
+	  FJAPanel.setBackground(new Color(56,57,49));
+	  FJAPanel.setBorder(new EmptyBorder(0, 0, 30, 0));
+	  for (int i = 0; i < 4; ++i) {
 	  	FJanswerPanel[i] = new JPanel(); FJanswerPanel[i].setLayout(new BoxLayout(FJanswerPanel[i], BoxLayout.X_AXIS));
-//	  	FJanswerPanel[i].setPreferredSize(new Dimension(300, 100));
+	  	FJanswerPanel[i].setBackground(new Color(56,57,49));
+	  	FJanswerPanel[i].setBorder(new MatteBorder(0, 20, 0, 20, new Color(56,57,49)));
+	  	FJAPanel.add(FJanswerPanel[i]);
+	  }
+	  
+	  for (int i = 0; i < GamePlay.Teams.size(); ++i) {
 	  	FJAArea[i] = new JTextField();
+	  	Helpers.styleComponentFlat(FJAArea[i], Color.BLACK, Color.WHITE, Color.WHITE, 17, true);
 	  	FJAArea[i].setText(GamePlay.Teams.get(i).getName() + ", enter your answer.");
-	  	FJAArea[i].setFont(new Font("Cambria", Font.BOLD, 15));
 	  	FJanswerPanel[i].add(FJAArea[i]);
 	  	
 	  	JLabel pad = new JLabel("   ");
 	  	FJanswerPanel[i].add(pad);
 	  	
 	  	FJABtn[i] = new JButton("Submit Answer");
-	  	FJABtn[i].setForeground(Color.BLACK);
-	  	FJABtn[i].setBackground(Color.WHITE);
-	  	FJABtn[i].setPreferredSize(new Dimension(150, 80));
-	  	FJABtn[i].setFont(new Font("Cambria", Font.BOLD, 15));
+	  	Helpers.styleComponentFlat(FJABtn[i], Color.BLACK, Color.WHITE, Color.WHITE, 17, true);
+	  	FJABtn[i].setBorder(new MatteBorder(13, 12, 13, 12, Color.WHITE));
 	  	FJanswerPanel[i].add(FJABtn[i]);
 	  	
 	  	
 	  	FJanswerPanel[i].setBorder(new EmptyBorder(15, 30, 15, 30));
-	  	FJanswerPanel[i].setBackground(Color.DARK_GRAY);
+	  	FJanswerPanel[i].setBackground(new Color(56,57,49));
 	  	
 	  }
-	  // add all panels to the layout
-	  JPanel FJAPanel = new JPanel(new GridLayout(2,4));
-	  FJAPanel.setBackground(Color.DARK_GRAY);
-	  FJAPanel.setBorder(new EmptyBorder(0, 0, 30, 0));
-	  for (int i = 0; i < GamePlay.Teams.size(); ++i)
-	  	FJAPanel.add(FJanswerPanel[i]);
 	  finalJeopardyPanel.add(FJAPanel);
-//		JTextField [] FJAArea = new JTextField[4];
-//		JButton [] FJABtn = new JButton[4];
-
-	  JPanel FJQPrompt = new JPanel();
-	  FJQArea = new JTextArea();
-	  
-	  FJQPrompt.add(FJQArea);
-	  
-	  finalJeopardyPanel.add(FJQPrompt);
 	}
 	
 	public static void showPanel(String panelName) {
 		if (panelName.equals("questionListPanel") || panelName.equals("answerQuestionPanel") || panelName.equals("finalJeopardyPanel"))
 			cl.show(mainPanel, panelName);
 	}
-	
-	public static void main(String [] args) {
-		GameBoardUI menubar = new GameBoardUI();
-		menubar.setVisible(true);
-	}
 
+	private String printPts(int pts) {
+		if (pts < 0)
+			return ("-$" + Math.abs(pts));
+		else
+			return ("$" + pts);
+	}
 }

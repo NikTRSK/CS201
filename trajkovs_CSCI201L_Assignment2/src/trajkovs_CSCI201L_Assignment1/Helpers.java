@@ -18,6 +18,10 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
 public class Helpers {
+	public static String capitalize(String toCapitalize) {
+		return toCapitalize.substring(0, 1).toUpperCase() + toCapitalize.substring(1);
+	}
+	
 	public static boolean elementExists(String [] array, String value) {
 		for (String toTest: array) {
 			if ((toTest.toLowerCase()).equals(value.toLowerCase()))
