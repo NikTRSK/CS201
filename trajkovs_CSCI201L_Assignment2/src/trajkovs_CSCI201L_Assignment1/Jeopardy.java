@@ -32,8 +32,7 @@ public class Jeopardy {
 	// Checks if the game is loaded correctly
 	protected static void checkValidGame(int qCount) {
 		if ( !(qCount == 25 && GamePlay.FJQuestion != null) ) {	// when both a question and FJ missing
-			FileChooser.displayPopup("Wrong number of questions");
-			System.exit(1);
+			throw new RuntimeException("Wrong number of questions");
 		}
 		
 		if (GamePlay.Questions.size() != 5)

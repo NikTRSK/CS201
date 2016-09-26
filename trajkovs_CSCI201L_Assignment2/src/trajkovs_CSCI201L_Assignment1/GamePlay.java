@@ -132,13 +132,6 @@ public class GamePlay {
 				winner.add(i);
 		}
 		return winner;
-//		System.out.print("The winning team");
-//		if (winner.size() == 1)
-//			System.out.println(" is: ");
-//		else
-//			System.out.println("s are: ");
-//		for (int team = 0; team < winner.size(); ++team)
-//			System.out.println(Teams.get(winner.get(team)).getName() + " with " + Teams.get(winner.get(team)).getPoints() + " points.");
 	}
 	
 	// Check for Exit and Replay signals
@@ -333,15 +326,12 @@ public class GamePlay {
 		}
 		// Generate the starting team
 		currTeam = (int)(Math.random() * Teams.size());
-		System.out.println(Teams.size() + ", " + currTeam);
 		// Set the number of answered questions to 0
 		qsAnswered = 0;
 		
 		// Reset bets fr all teams
 		Arrays.fill(FJBets, 0);
 		Arrays.fill(FJAnswers, null);
-		
-//		GamePlay.Teams.get(1).addPoints(100); GamePlay.Teams.get(1).addPoints(600); GamePlay.Teams.get(1).addPoints(1100); GamePlay.Teams.get(1).addPoints(2500);
 	}
 	
 	static protected void updateCurrentTeam() {

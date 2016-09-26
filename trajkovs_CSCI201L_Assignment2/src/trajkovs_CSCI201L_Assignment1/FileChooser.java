@@ -19,7 +19,6 @@ import java.io.File;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
@@ -84,7 +83,8 @@ public class FileChooser extends JFrame {
 		quickPlay.setFont(new Font("Cambria", Font.BOLD, 15));
 		
 		// Create prompt Label
-		promptLbl = new JLabel("Choose the game file, number of teams, and team names before starting the game");
+		promptLbl = new JLabel("Choose the game file, number of teams, and team names before starting the game", SwingConstants.CENTER);
+		promptLbl.setAlignmentX(CENTER_ALIGNMENT);
 		promptLbl.setFont(new Font("Cambria", Font.BOLD, 18));
 		promptLbl.setForeground(Color.WHITE);
 		promptLbl.setBorder(new EmptyBorder(20,0,0,0));
@@ -189,18 +189,18 @@ public class FileChooser extends JFrame {
 		FlowLayout filePanelLayout = new FlowLayout();
 		filePanelLayout.setHgap(5);
 		filePanel.setLayout(filePanelLayout);
-		mainPanel.add(filePanel);
 		filePanel.add(fileChooserLbl);
 		filePanel.add(chooseFileBtn);
 		filePanel.add(fileNameLbl);
+		mainPanel.add(filePanel);
 		
 		// Select number of teams
 		selectTeamPanel = new JPanel();
 		selectTeamPanel.setLayout(new BoxLayout(selectTeamPanel, BoxLayout.Y_AXIS));
 		selectTeamPanel.setBackground(new Color(9,204,185));
-		mainPanel.add(selectTeamPanel);
 		selectTeamPanel.add(teamPromptLbl);
 		selectTeamPanel.add(teamSelectSlider);
+		mainPanel.add(selectTeamPanel);
 		
 		// Team list
 		JPanel teamListPanel = new JPanel();
@@ -208,8 +208,6 @@ public class FileChooser extends JFrame {
 		teamListPanel.setBackground(new Color(9,204,185));
 		mainPanel.add(teamListPanel);
 		gbc.weightx = 1;
-		
-//		JPanel topTeamPanel
 		gbc.gridx = 1; gbc.gridy = 1;
 		gbc.insets = new Insets(0, 0, 2, 0);
 		teamListPanel.add(teamLbls[0], gbc);
@@ -246,19 +244,18 @@ public class FileChooser extends JFrame {
 		JPanel navigationPanel = new JPanel();
 		// cahnge this to just empty border
 		navigationPanel.setBackground(new Color(9,204,185));
-	  Border navLine = new LineBorder(new Color(9,204,185));
-	  Border navMargin = new EmptyBorder(30, 0, 30, 0);
-	  Border navCompound = new CompoundBorder(navLine, navMargin);
+	  Border navCompound = new CompoundBorder(new LineBorder(new Color(9,204,185)), new EmptyBorder(30, 0, 30, 0));
 		navigationPanel.setBorder(navCompound);
-		add(navigationPanel, BorderLayout.SOUTH);
 		navigationPanel.add(startBtn);
 		navigationPanel.add(clearBtn);
 		navigationPanel.add(exitBtn);
+		add(navigationPanel, BorderLayout.SOUTH);
 	}
 	
 	private void addEvents() {		
 		// Listener for Window close
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		// X Button Listener
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent we) {
 				String Btns[] = {"Yes", "No"};
@@ -321,7 +318,7 @@ public class FileChooser extends JFrame {
 				GamePlay.InitGame();
 				// Check for Quick Play
 				if (quickPlay.isSelected())
-					GamePlay.qsAnswered = 24;
+					GamePlay.qsAnswered = 20;
 				Jeopardy.createGameBoard();
 			}
 			
@@ -335,10 +332,11 @@ public class FileChooser extends JFrame {
 			}
 		});
 		
-		clearBtn.addActionListener((ActionEvent event) -> {
+		clearBtn.addActionListener((ActionEvent event) -> { // playing around with instant instantiation
       // Clear file
 			inputFile = null;
 			fileNameLbl.setText("");
+			GamePlay.resetVariables();
 			
 			// Clear teams
 			for (int team = 0; team < 4; ++team)
@@ -369,7 +367,6 @@ public class FileChooser extends JFrame {
 				}
 			});
 		}
-//			validInput();
 	}
 	
 	class dialogBox extends JOptionPane {
@@ -417,10 +414,7 @@ public class FileChooser extends JFrame {
 		JDialog popup = new JDialog();
 		popup.setTitle("Error Parsing File!!!");
 		popup.setPreferredSize(new Dimension(300, 150));
-		
 
-//		JOptionPane.showMessageDialog(popup, text, "Parsing Error", JOptionPane.ERROR_MESSAGE);
-		
 		JPanel Panel = new JPanel();
 		Panel.setBackground(new Color(0,150,136));
 		
@@ -460,10 +454,5 @@ public class FileChooser extends JFrame {
 		popup.add(buttonPanel, BorderLayout.SOUTH);
 		popup.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
 		popup.pack();
-	}
-	
-	public static void main (String [] args) {
-		FileChooser fc = new FileChooser();
-		fc.setVisible(true);
 	}
 }
