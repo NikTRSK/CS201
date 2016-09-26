@@ -1,15 +1,6 @@
 package trajkovs_CSCI201L_Assignment1;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.LineNumberReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-
-import java.util.Scanner;
 import java.util.ArrayList;
-import java.util.Arrays;
 //import Question
 
 public class Jeopardy {
@@ -51,7 +42,6 @@ public class Jeopardy {
 		for (String key: GamePlay.Questions.keySet()) {
 			if (GamePlay.Questions.get(key).size() != 5) {
 				throw new RuntimeException("Incorrect number of point values\n Terminating...");
-//				System.exit(1);
 			}
 		}
 	}

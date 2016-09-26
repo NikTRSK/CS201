@@ -9,7 +9,6 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -45,8 +44,6 @@ import javax.swing.text.StyledDocument;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
-import java.applet.Applet;
-
 public class FileChooser extends JFrame {
 	private static final long serialVersionUID = 1L;
 	// GUI Elements
@@ -78,8 +75,7 @@ public class FileChooser extends JFrame {
 		welcomeLbl = new JLabel("Welcome to Jeopardy!");
 		welcomeLbl.setFont(new Font("Cambria", Font.BOLD, 45));
 		welcomeLbl.setForeground(Color.WHITE);
-		welcomeLbl.setHorizontalAlignment(JLabel.CENTER);
-		welcomeLbl.setAlignmentX(JComponent.CENTER_ALIGNMENT);
+		welcomeLbl.setBorder(new EmptyBorder(0,100,0,0));
 		
 		// Create Quick Play checkbox
 		quickPlay = new JCheckBox("Quick Play");
@@ -91,7 +87,7 @@ public class FileChooser extends JFrame {
 		promptLbl = new JLabel("Choose the game file, number of teams, and team names before starting the game");
 		promptLbl.setFont(new Font("Cambria", Font.BOLD, 18));
 		promptLbl.setForeground(Color.WHITE);
-		promptLbl.setHorizontalAlignment(JLabel.CENTER);
+		promptLbl.setBorder(new EmptyBorder(20,0,0,0));
 		
 		//////////////////
 		// File Chooser //
@@ -136,7 +132,7 @@ public class FileChooser extends JFrame {
 		}
 
 		/////////////////////
-		// Nav bar buttons //
+		// Navigation bar buttons //
 		/////////////////////
 		startBtn = new JButton("Start Jeopardy");
 		Helpers.styleComponentFlat(startBtn, Color.WHITE, Color.DARK_GRAY, Color.DARK_GRAY, 22, true);
@@ -149,8 +145,7 @@ public class FileChooser extends JFrame {
 		
 		exitBtn = new JButton("Exit");
 		Helpers.styleComponentFlat(exitBtn, Color.WHITE, Color.DARK_GRAY, Color.DARK_GRAY, 22, true);
-		exitBtn.setPreferredSize(new Dimension(200, 35));
-		
+		exitBtn.setPreferredSize(new Dimension(200, 35));		
 	}
 	
 	private void createGUI() {
@@ -167,7 +162,6 @@ public class FileChooser extends JFrame {
 		JPanel welcomePanelTop = new JPanel(); welcomePanelTop.setLayout(new BoxLayout(welcomePanelTop, BoxLayout.X_AXIS));
 		welcomePanelTop.setBackground(new Color(0,137,123));
 		JPanel welcomeLblPanel = new JPanel();
-		welcomeLbl.setBorder(new EmptyBorder(0,100,0,0));
 		welcomeLblPanel.add(welcomeLbl); welcomeLblPanel.setBackground(new Color(0,137,123));
 		welcomePanelTop.add(welcomeLblPanel);
 		welcomePanelTop.add(quickPlay);
@@ -175,8 +169,6 @@ public class FileChooser extends JFrame {
 		JPanel welcomePanel = new JPanel(); welcomePanel.setLayout(new BoxLayout(welcomePanel, BoxLayout.Y_AXIS));
 		welcomePanel.setBackground(new Color(0,137,123));
 		welcomePanel.add(welcomePanelTop);
-		promptLbl.setAlignmentX(Component.CENTER_ALIGNMENT);
-		promptLbl.setBorder(new EmptyBorder(20,0,0,0));
 		welcomePanel.add(promptLbl);
 		
 		add(welcomePanel, BorderLayout.NORTH);
@@ -288,10 +280,16 @@ public class FileChooser extends JFrame {
 		    
 		    int returnVal = chooseFile.showOpenDialog(null);
 		    if (returnVal == JFileChooser.APPROVE_OPTION) {
-		    	inputFile = chooseFile.getSelectedFile();
-					fileNameLbl.setText(inputFile.getName());
+					try {
+						inputFile = chooseFile.getSelectedFile();
+						Helpers.ParseFile(inputFile);
+						fileNameLbl.setText(inputFile.getName());
+						validInput();
+					} catch (RuntimeException rte) {
+						displayPopup(rte.getMessage());
+						GamePlay.resetVariables();		
+					}
 		    }
-		    validInput();
 			}
 		});
 		
@@ -317,22 +315,14 @@ public class FileChooser extends JFrame {
 		
 		startBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-//			GamePlay.numTeams = teamSelectSlider.getValue();
-			try {
-			GamePlay.numTeams = teamSelectSlider.getValue();
-			Helpers.ParseFile(inputFile);
-			validInput();
-			GenerateTeams();
-			GamePlay.InitGame();
-			// Check for Quick Play
-			if (quickPlay.isSelected())
-//				GamePlay.qsAnswered = 20;
-				GamePlay.qsAnswered = 24;
-			Jeopardy.createGameBoard();
-		} catch (RuntimeException rte) {
-			displayPopup(rte.getMessage());
-			GamePlay.resetVariables();
-		}
+				GamePlay.numTeams = teamSelectSlider.getValue();
+				validInput();
+				GenerateTeams();
+				GamePlay.InitGame();
+				// Check for Quick Play
+				if (quickPlay.isSelected())
+					GamePlay.qsAnswered = 24;
+				Jeopardy.createGameBoard();
 			}
 			
 			private void GenerateTeams() {

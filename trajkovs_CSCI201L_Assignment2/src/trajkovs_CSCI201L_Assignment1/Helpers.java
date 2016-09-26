@@ -122,13 +122,6 @@ public class Helpers {
 		item.setFont(new Font("Cambria", Font.BOLD, fontSize));
 	}
 	
-//	public static void styleComponent(JComponent item, Color textColor, Color backgroundColor, int fontSize) {
-//		item.setBackground(backgroundColor);
-//		item.setOpaque(true);
-//		item.setBorder(new LineBorder(backgroundColor));
-//		item.setFont(new Font("Cambria", Font.BOLD, fontSize));
-//	}
-	
 	public static void styleComponentFlat(JComponent item, Color textColor, Color backgroundColor, Color borderColor, int fontSize, boolean opaque) {
 		item.setFont(new Font("Cambria", Font.BOLD, fontSize));
 		item.setForeground(textColor);

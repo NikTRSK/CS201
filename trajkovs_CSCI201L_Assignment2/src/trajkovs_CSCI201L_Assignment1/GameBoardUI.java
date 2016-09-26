@@ -1,9 +1,5 @@
 package trajkovs_CSCI201L_Assignment1;
 
-import trajkovs_CSCI201L_Assignment1.*;
-
-import static javax.swing.Box.createVerticalBox;
-
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
@@ -16,20 +12,16 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -38,6 +30,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -69,6 +62,7 @@ public class GameBoardUI extends JFrame {
 	JLabel titleLbl;
 	JLabel progressTitle;
 	JTextArea teamPrompt;
+	JScrollPane promptPane;
 
 	// Question Panel
 	JPanel answerQuestionPanel, finalJeopardyPanel;
@@ -167,18 +161,22 @@ public class GameBoardUI extends JFrame {
 		// Progress panel components
 		progressTitle = new JLabel("Game Progress", SwingConstants.CENTER);
 		progressTitle.setAlignmentX(CENTER_ALIGNMENT); progressTitle.setAlignmentY(TOP_ALIGNMENT);
-		progressTitle.setPreferredSize(new Dimension(400, 80));
-		progressTitle.setBackground(Color.BLACK);
+		progressTitle.setPreferredSize(new Dimension(400, 50));
+		progressTitle.setForeground(Color.BLACK);
 		progressTitle.setFont(new Font("Cambria", Font.BOLD, 25));
 		
 		teamPrompt = new JTextArea("Welcome to Jeopardy!\nThe team to go first is " + GamePlay.Teams.get(GamePlay.currTeam).getName() + "\n");
-//		teamPrompt = new JTextArea("");
+		promptPane = new JScrollPane(teamPrompt);
+		promptPane.getViewport().setBackground(new Color(0,137,123));
+		promptPane.setBorder(new LineBorder(new Color(0,137,123)));
 		teamPrompt.setWrapStyleWord(true);
 		teamPrompt.setLineWrap(true);
 		teamPrompt.setForeground(Color.BLACK);
 		teamPrompt.setOpaque(false);
 		teamPrompt.setFont(new Font("Cambria", Font.BOLD, 17));
 		teamPrompt.setEditable(false);
+		teamPrompt.setDisabledTextColor(Color.BLACK);
+		teamPrompt.setEnabled(false);
 		DefaultCaret caret = (DefaultCaret)teamPrompt.getCaret();
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		
@@ -234,7 +232,7 @@ public class GameBoardUI extends JFrame {
 		qSubmitBtn.setPreferredSize(new Dimension(150, 60));
 		qSubmitBtn.setFont(new Font("Cambria", Font.BOLD, 18));
 		
-		qErrorLbl = new JLabel("This is a place holder for error message", SwingConstants.CENTER);
+		qErrorLbl = new JLabel("\n", SwingConstants.CENTER);
 		qErrorLbl.setVerticalAlignment(SwingConstants.CENTER);
 		qErrorLbl.setForeground(Color.LIGHT_GRAY);
 		qErrorLbl.setFont(new Font("Cambria", Font.BOLD, 22));
@@ -316,8 +314,8 @@ public class GameBoardUI extends JFrame {
 
 		gameProgressPanel.add(progressTitle);
 		
-//		// Create the team prompt
-		gameProgressPanel.add(teamPrompt);
+		// Create the team prompt
+		gameProgressPanel.add(promptPane);
 		
 		createQuestionPanel();
 		
@@ -405,10 +403,10 @@ public class GameBoardUI extends JFrame {
 				qCatLbl.setText(Helpers.capitalize(GamePlay.currQuestion.getCategory()));
 				qPtValueLbl.setText("$" + GamePlay.currQuestion.getPointValue());
 				qQuestionArea.setText(GamePlay.currQuestion.getQuestion());
-				qErrorLbl.setText("");
+				qErrorLbl.setText("\n");
 				qAnswerArea.setText("");
 				showPanel("answerQuestionPanel"); // show question panel
-				teamPrompt.append(GamePlay.Teams.get(GamePlay.currTeam).getName() + " chose the question in " + Helpers.capitalize(GamePlay.currQuestion.getCategory()) + " worth $" + GamePlay.currQuestion.getPointValue());
+				teamPrompt.append(GamePlay.Teams.get(GamePlay.currTeam).getName() + " chose the question in " + Helpers.capitalize(GamePlay.currQuestion.getCategory()) + " worth $" + GamePlay.currQuestion.getPointValue() + "\n");
 				((JButton)e.getSource()).setEnabled(false);
 				((JButton)e.getSource()).setBackground(new Color(113, 115, 98));
 				qAnswerArea.requestFocusInWindow();
@@ -465,7 +463,7 @@ public class GameBoardUI extends JFrame {
 						GamePlay.updateCurrentTeam();
 					}
 					if (GamePlay.qsAnswered == 25)
-						createJeopardy();
+						createFinalJeopardy();
 					GamePlay.qsAnswered++;
 					if (GamePlay.qsAnswered < 25) {
 						showPanel("questionListPanel");
@@ -483,7 +481,7 @@ public class GameBoardUI extends JFrame {
 					GamePlay.Teams.get(GamePlay.currTeam).subPoints(GamePlay.currQuestion.getPointValue());
 					System.out.println("Qans:" + GamePlay.qsAnswered);
 					if (GamePlay.qsAnswered == 25)
-						createJeopardy();
+						createFinalJeopardy();
 					else showPanel("questionListPanel");
 					GamePlay.qsAnswered++;
 					teamLbl.get(GamePlay.currTeam).getItem2().setText(printPts(GamePlay.Teams.get(GamePlay.currTeam).getPoints()));
@@ -492,11 +490,11 @@ public class GameBoardUI extends JFrame {
 					GamePlay.numTries = 0;
 				}
 				if (GamePlay.qsAnswered == 25)
-					createJeopardy();
+					createFinalJeopardy();
 				System.out.println("QsAns: " + GamePlay.qsAnswered + "tries: " + GamePlay.numTries);
 			}
 			
-			private void createJeopardy() {
+			private void createFinalJeopardy() {
 				if (GamePlay.teamsAllNegative()) {
 					
 					JDialog noJeopardyDialog = new JDialog();
@@ -626,11 +624,13 @@ public class GameBoardUI extends JFrame {
 		
 		// When clicked clear text box
 		for (int i = 0; i < GamePlay.Teams.size(); ++i) {
-			FJAArea[i].addMouseListener(new MouseAdapter() {
-				public void mouseClicked(MouseAdapter e) {
-					System.out.println("HERE");
-//					if (/*((JTextArea)e.getSource()).isEnabled() && */(e.toString())./*getText().*/contains("enter your answer."))
-//						((JTextArea)e.getSource()).setText("");;
+			FJAArea[i].addFocusListener(new FocusListener() {
+				public void focusGained(FocusEvent e) {
+					((JTextField)e.getSource()).setText("");
+				}
+
+				public void focusLost(FocusEvent e) {
+					// Nothing to do
 				}
 			});
 		}
